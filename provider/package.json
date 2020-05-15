@@ -1,0 +1,33 @@
+{
+  "name": "ptweb",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.13.0",
+    "bootstrap-vue": "^2.13.0",
+    "core-js": "^3.6.4",
+    "vue": "^2.6.11",
+    "vuex": "^3.3.0",
+    "webrtc-adapter": "^7.5.1"
+  },
+  "devDependencies": {
+    "@aspnet/signalr": "^1.1.4",
+    "@vue/cli-plugin-babel": "~4.3.0",
+    "@vue/cli-service": "~4.3.0",
+    "axios": "^0.19.2",
+    "less-loader": "^6.0.0",
+    "node-sass": "^4.14.0",
+    "sass-loader": "^8.0.2",
+    "vue-template-compiler": "^2.6.11",
+    "webpack": "^4.43.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

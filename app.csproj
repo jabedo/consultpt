@@ -1,0 +1,81 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="client\**" />
+    <Compile Remove="provider1\**" />
+    <Compile Remove="provider\**" />
+    <Compile Remove="search\**" />
+    <Compile Remove="signalr\**" />
+    <Compile Remove="tcpclient\**" />
+    <Compile Remove="tcpserver\**" />
+    <Compile Remove="tcpserve\**" />
+    <Content Remove="client\**" />
+    <Content Remove="provider1\**" />
+    <Content Remove="provider\**" />
+    <Content Remove="search\**" />
+    <Content Remove="signalr\**" />
+    <Content Remove="tcpclient\**" />
+    <Content Remove="tcpserver\**" />
+    <Content Remove="tcpserve\**" />
+    <EmbeddedResource Remove="client\**" />
+    <EmbeddedResource Remove="provider1\**" />
+    <EmbeddedResource Remove="provider\**" />
+    <EmbeddedResource Remove="search\**" />
+    <EmbeddedResource Remove="signalr\**" />
+    <EmbeddedResource Remove="tcpclient\**" />
+    <EmbeddedResource Remove="tcpserver\**" />
+    <EmbeddedResource Remove="tcpserve\**" />
+    <None Remove="client\**" />
+    <None Remove="provider1\**" />
+    <None Remove="provider\**" />
+    <None Remove="search\**" />
+    <None Remove="signalr\**" />
+    <None Remove="tcpclient\**" />
+    <None Remove="tcpserver\**" />
+    <None Remove="tcpserve\**" />
+    <TypeScriptCompile Remove="client\**" />
+    <TypeScriptCompile Remove="provider1\**" />
+    <TypeScriptCompile Remove="provider\**" />
+    <TypeScriptCompile Remove="search\**" />
+    <TypeScriptCompile Remove="signalr\**" />
+    <TypeScriptCompile Remove="tcpclient\**" />
+    <TypeScriptCompile Remove="tcpserver\**" />
+    <TypeScriptCompile Remove="tcpserve\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\QuestionController.cs" />
+    <Compile Remove="Utilities\ImageSaveUtility.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bogus" Version="29.0.2" />
+    <PackageReference Include="Braintree" Version="4.17.0" />
+    <PackageReference Include="Faker.Net" Version="1.3.77" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.5.0" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.9.0-beta">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Utilities\" />
+  </ItemGroup>
+
+
+</Project>

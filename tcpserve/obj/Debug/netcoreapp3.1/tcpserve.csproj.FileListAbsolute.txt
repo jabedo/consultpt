@@ -1,0 +1,13 @@
+E:\Dev\web\app\tcpserve\bin\Debug\netcoreapp3.1\tcpserve.exe
+E:\Dev\web\app\tcpserve\bin\Debug\netcoreapp3.1\tcpserve.deps.json
+E:\Dev\web\app\tcpserve\bin\Debug\netcoreapp3.1\tcpserve.runtimeconfig.json
+E:\Dev\web\app\tcpserve\bin\Debug\netcoreapp3.1\tcpserve.runtimeconfig.dev.json
+E:\Dev\web\app\tcpserve\bin\Debug\netcoreapp3.1\tcpserve.dll
+E:\Dev\web\app\tcpserve\bin\Debug\netcoreapp3.1\tcpserve.pdb
+E:\Dev\web\app\tcpserve\obj\Debug\netcoreapp3.1\tcpserve.csprojAssemblyReference.cache
+E:\Dev\web\app\tcpserve\obj\Debug\netcoreapp3.1\tcpserve.csproj.CoreCompileInputs.cache
+E:\Dev\web\app\tcpserve\obj\Debug\netcoreapp3.1\tcpserve.AssemblyInfoInputs.cache
+E:\Dev\web\app\tcpserve\obj\Debug\netcoreapp3.1\tcpserve.AssemblyInfo.cs
+E:\Dev\web\app\tcpserve\obj\Debug\netcoreapp3.1\tcpserve.dll
+E:\Dev\web\app\tcpserve\obj\Debug\netcoreapp3.1\tcpserve.pdb
+E:\Dev\web\app\tcpserve\obj\Debug\netcoreapp3.1\tcpserve.genruntimeconfig.cache

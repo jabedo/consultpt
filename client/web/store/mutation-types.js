@@ -1,0 +1,7 @@
+export const SET_PROVIDER = 'SET_PROVIDER';
+export const SET_CONTACTS = 'SET_CONTACTS';
+export const REMOVE_CONTACT = 'REMOVE_CONTACT';
+export const SET_GENERATING = 'SET_GENERATING';
+export const SET_SETPROFILE = 'SET_PROFILE';
+export const SET_SETTOKEN = 'SET_SETTOKEN';
+
