@@ -16,130 +16,79 @@ namespace app.Models
 {
     public static class DBInitializer
     {
-        public static  void Seed(UsersDBContext context)
+        public static void Seed(UsersDBContext context)
         {
-            if (context.Providers != null && context.Providers.Count() > 10)
+            if (context.Providers.Count() < 100)
             {
-                return;
+                //Populate database with fake data
+                List<Provider> fakeList = new List<Provider>();
+                List<ProviderImage> fakeImageList = new List<ProviderImage>();
+                WebClient webClient = new WebClient();
+                for (int i = 0; i < 100; i++)
+                {
+                    var bogusProvider = new Faker<Provider>()
+                                   .RuleFor(u => u.PhotoName_URL, f => f.Internet.Avatar()).Generate();
+                    Provider provider = new Provider
+                    {
+                        Address = Address.StreetAddress(),
+                        City = Address.City(),
+                        State = Address.UsState(),
+                        Credentials = Name.Prefix(),
+                        IDLicenceNumber = Identification.SocialSecurityNumber(),
+                        IDState = Address.UsState(),
+                        IDTType = Identification.MedicareBeneficiaryIdentifier(),
+                        LicenseDate = Identification.DateOfBirth(),
+                        LicenseState = Address.UsState(),
+                        DOB = Identification.DateOfBirth(),
+                        Title = Company.Name(),
+                        FirstName = Name.First(),
+                        LastName = Name.Last(),
+                        UserName = Internet.Email(),
+                        Bio = SplitString(Lorem.Words(100)),
+                        PhoneNumber = Phone.Number(),
+                        PhotoName_URL = bogusProvider.PhotoName_URL,
+                        ZipCode = Address.ZipCode(),
+                    };
+                    //fakeList.Add(provider);
+                    context.Providers.Add(provider);
+                    context.SaveChanges();
+                    ProviderImage image = new ProviderImage
+                    {
+                        ImageData = webClient.DownloadData(provider.PhotoName_URL),
+                        Provider = provider
+                    };
+                    //fakeImageList.Add(image);
+                    context.Images.Add(image);
+                    context.SaveChanges();
+                }
             }
 
-            //Populate database with fake data
-            List<Provider> fakeList = new List<Provider>();
-            List<ProviderImage> fakeImageList = new List<ProviderImage>();
-            WebClient webClient = new WebClient();
-            for (int i = 0; i < 200; i++)
+            //Add subscriber test data
+            if (context.Subscribers.Count() < 50)
             {
-                var bogusProvider = new Faker<Provider>()
-                               .RuleFor(u => u.PhotoName_URL, f => f.Internet.Avatar()).Generate();
-                Provider provider = new Provider
+                var fakeSubscribers = new List<Subscriber>();
+                for (int i = 0; i < 50; i++)
                 {
-                    Address = Address.StreetAddress(),
-                    City = Address.City(),
-                    State = Address.UsState(),
-                    Credentials = Name.Prefix(),
-                    IDLicenceNumber = Identification.SocialSecurityNumber(),
-                    IDState = Address.UsState(),
-                    IDTType = Identification.MedicareBeneficiaryIdentifier(),
-                    LicenseDate = Identification.DateOfBirth(),
-                    LicenseState = Address.UsState(),
-                    DOB = Identification.DateOfBirth(),
-                    Title = Company.Name(),
-                    FirstName = Name.First(),
-                    LastName = Name.Last(),
-                    UserName = Internet.UserName(),
-                    Bio = SplitString(Lorem.Words(100)),
-                    PhoneNumber = Phone.Number(),
-                    PhotoName_URL = bogusProvider.PhotoName_URL,
-                    ZipCode = Address.ZipCode(),
-                };
-                //fakeList.Add(provider);
-                context.Providers.Add(provider);
+                    Subscriber subscriber = new Subscriber
+                    {
+                        Address = Address.StreetAddress(),
+                        PhoneNumber = Phone.Number(),
+                        ZipCode = Address.ZipCode(),
+                        Name = string.Format("{0} {1}", Name.First(), Name.Last()),
+                        State = Address.UsState(),
+                        UserName = Internet.Email(),
+                    };
+                    fakeSubscribers.Add(subscriber);
+                }
+
+                context.Subscribers.AddRange(fakeSubscribers);
                 context.SaveChanges();
-                 ProviderImage image = new ProviderImage
-                {
-                    ImageData = webClient.DownloadData(provider.PhotoName_URL),
-                    Provider = provider
-                };
-                //fakeImageList.Add(image);
-                context.Images.Add(image);
-                context.SaveChanges();
-               
-            }
-
-
-            //    //  This method will be called after migrating to the latest version.
-
-            ////  You can use the DbSet<T>.AddOrUpdate() helper extension method 
-            ////  to avoid creating duplicate seed data. E.g.
-
-            //context.Providers.AddRange( 
-            //    // ALWAYS Use Add-Migration Initial -IgnoreChanges if DataMigration!!!
-            //      new Provider
-            //      {
-            //          Bio = "Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.",
-            //          LastName = "Quinn",
-            //          FirstName = "Scott",
-            //          IDState = "CO",
-            //          IDLicenceNumber = "PTCO2015",
-            //          Title = "Physical Therapist",
-            //          PhoneNumber = "XXX-XXX-XXXX",
-            //          UserName = "scottquinn@quinn.com",
-            //          PhotoName = "scottquinn.png"
-            //      },
-            //      new Provider
-            //      {
-            //          Bio = "Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident",
-            //          LastName = "Therapist",
-            //          FirstName = "Some",
-            //          IDState = "CO",
-            //          IDLicenceNumber = "PTCO2017",
-            //          Title = "Physical Therapist",
-            //          PhoneNumber = "XXX-XXX-XXXX",
-            //          UserName = "sometherapist@quinn.com",
-            //          PhotoName = "sometherapist.png"
-            //      },
-            //      new Provider
-            //      {
-            //          Bio = "Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident",
-            //          LastName = "Therapist",
-            //          FirstName = "Another",
-            //          IDState = "CO",
-            //          IDLicenceNumber = "PTCOO1",
-            //          Title = "Dr Physical Therapist",
-            //          PhoneNumber = "XXX-XXX-XXXX",
-            //          UserName = "anothertherapist@quinn.com",
-            //          PhotoName = "anothertherapist.png"
-            //      }
-            //      );
-            //    context.SaveChanges();
-            //    context.Subscribers.AddRange(
-            //              new Subscriber
-            //              {
-            //                  UserName = "janeking@janeking.com",
-            //                  Name = "Jane King"
-            //              },
-            //              new Subscriber
-            //              {
-            //                  UserName = "bob@bob.com",
-            //                  Name = "Bob Fuller",
-            //              },
-            //              new Subscriber
-            //              {
-            //                  UserName = "lindaking@linda.com",
-            //                  Name = "Linda Kallahan"
-            //              },
-            //              new Subscriber
-            //              {
-            //                  UserName = "janedoe@janedoe.com",
-            //                  Name = "Jane Doe"
-            //              }
-            //              );
-            //    context.SaveChanges();
-
+                  
+                }
 
         }
 
-        private static string SplitString(IEnumerable<string> enumerable)
+            private static string SplitString(IEnumerable<string> enumerable)
         {
             StringBuilder builder = new StringBuilder();
             foreach(var str in enumerable)

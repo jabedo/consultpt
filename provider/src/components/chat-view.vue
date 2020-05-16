@@ -16,7 +16,6 @@
             </div>
             <div id="room-id-input-buttons">
                 <button id="join-button" :disabled="!isAuthenticated">JOIN</button>
-                <button id="random-button" :disabled="!isAuthenticated" >RANDOM</button>
             </div>
         </div>
         <div id="recent-rooms">

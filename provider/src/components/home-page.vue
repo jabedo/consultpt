@@ -21,7 +21,7 @@ components: {
 // Wrapper
 
 .main {
-  margin: 6rem;
+  margin: 1rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -30,18 +30,18 @@ components: {
   &__subtitle {
     color: #4f5959;
     font-weight: 100;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
   }
   &__link {
-    margin-right: 1.5rem;
+    margin-right: 0.5rem;
     display: inline-block;
     &:last-child {
       margin-right: 0;
     }
   }
   &__svg {
-    width: 2rem;
-    height: 2rem;
+    width: 1rem;
+    height: 1rem;
     opacity: 0.6;
     color: #94a2b0;
     &:hover {

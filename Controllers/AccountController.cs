@@ -173,13 +173,22 @@ namespace app.Controllers
                 expires: DateTime.UtcNow.AddDays(30),
                 signingCredentials: SigningCreds);
 
+            var provider = _dbContext.Providers.FirstOrDefault(c => c.UserName == creds.Email);
+            var roomId = Guid.NewGuid();
+
+            //_hubContext.Clients.Groups("subscribers").ProviderJoined(new ClientUser 
+            //{ 
+            //    Username = provider.UserName,
+            //    RoomId = roomId.ToString(),
+            //});
             return Json(new
             {
                 token = _tokenHandler.WriteToken(token),
                 name = principal.Identity.Name,
                 email = principal.FindFirstValue(ClaimTypes.Email),
                 role = principal.FindFirstValue(ClaimTypes.Role),
-                roomId = Guid.NewGuid()
+                roomId = roomId,
+                avatar = provider.PhotoName_URL
             });
         }
         private bool ValidateLogin(LoginCredentials creds)

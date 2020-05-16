@@ -7,7 +7,7 @@
                       type="email"
                       v-model="form.email"
                       required
-                      placeholder="Enter your email address">
+                      placeholder="pearlie.kuvalis@kulasolson.uk">
         </b-form-input>
       </b-form-group>
       <b-form-group label="Password:" label-for="passwordInput">
@@ -31,8 +31,8 @@ export default {
   data () {
     return {
       form: {
-        email: '',
-        password: ''
+        email: 'pearlie.kuvalis@kulasolson.uk',
+        password: 'bogus123'
       },
       authMode: 'jwt',
     }
