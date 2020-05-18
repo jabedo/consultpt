@@ -55,7 +55,7 @@ namespace app
         {
             services.AddControllers();
             services.AddCors();
-            /*
+
             services.AddLogging(builder =>
             {
                 builder.AddConsole()
@@ -63,7 +63,7 @@ namespace app
                     .AddFilter<ConsoleLoggerProvider>(category: null, level: LogLevel.Debug)
                     .AddFilter<DebugLoggerProvider>(category: null, level: LogLevel.Debug);
             });
-            */
+
             if (_env.IsDevelopment())
             {
                 services.AddSingleton<IAuthorizationHandler, AllowAnonymous>();

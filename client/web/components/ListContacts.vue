@@ -79,9 +79,6 @@ export default {
       this.retrieveContacts();
   },
   computed: {
-   /*    ...mapGetters('context', [
-      'itemsMap','generating'
-    ]), */
     ...mapGetters({
       itemsMap: 'currentContacts',
       generating: 'isGenerating',

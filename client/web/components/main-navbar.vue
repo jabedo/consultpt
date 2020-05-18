@@ -23,7 +23,7 @@
         </button>
       </form>
       <form v-else class="form-inline my-2 my-lg-0">
-        <button v-b-modal.prevent.loginModal class="btn btn-secondary my-2 my-sm-0" type="submit">
+        <button v-b-modal.prevent.loginModal class="btn btn-secondary my-2 my-sm-0" type="submit" @click.prevent>
           Login
         </button>
       </form>
@@ -44,9 +44,9 @@ export default {
     ]),
   },
   methods: {
-    ...mapActions({
-      logout:'logout'
-    })
+   ...mapActions('context', [
+     'logout'
+    ]),
   }
 }
 </script>

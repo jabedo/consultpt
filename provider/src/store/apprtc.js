@@ -72,6 +72,7 @@
       roomSelectionInput: "#room-id-input",
       roomSelectionInputLabel: "#room-id-input-label",
       roomSelectionJoinButton: "#join-button",
+      roomSelectionRandomButton: "#random-button",
       roomSelectionRecentList: "#recent-rooms-list",
       sharingDiv: "#sharing-div",
       statusDiv: "#status-div",
@@ -136,7 +137,6 @@
             this.remoteVideoResetTimer_ = null;
             if (this.loadingParams_.roomId) {
               this.createCall_();
-
               if (
                 !RoomSelection.matchRandomRoomPattern(
                   this.loadingParams_.roomId
@@ -145,8 +145,6 @@
                 $(UI_CONSTANTS.confirmJoinRoomSpan).textContent =
                   ' "' + this.loadingParams_.roomId + '"';
               }
-
-
               var confirmJoinDiv = $(UI_CONSTANTS.confirmJoinDiv);
               this.show_(confirmJoinDiv);
               $(UI_CONSTANTS.confirmJoinButton).onclick = function() {
@@ -1035,6 +1033,9 @@
           this.params_.clientId +
           window.location.search;
         var xhr = new XMLHttpRequest();
+      /*   xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.setRequestHeader("Authorization", "Bearer " + params.authtoken); */
+
         xhr.open("POST", path, true);
         xhr.send(msgString);
         trace("C->GAE: " + msgString);
@@ -1993,10 +1994,13 @@
       this.roomJoinButton_ = this.roomSelectionDiv_.querySelector(
         uiConstants.roomSelectionJoinButton
       );
+      this.roomRandomButton_ = this.roomSelectionDiv_.querySelector(
+        uiConstants.roomSelectionRandomButton
+      );
       this.roomRecentList_ = this.roomSelectionDiv_.querySelector(
         uiConstants.roomSelectionRecentList
       );
-   /*    this.roomIdInput_.value = randomString(9); */
+      this.roomIdInput_.value = randomString(9);
       this.onRoomIdInput_();
       this.roomIdInputListener_ = this.onRoomIdInput_.bind(this);
       this.roomIdInput_.addEventListener(
@@ -2008,6 +2012,12 @@
       this.roomIdInput_.addEventListener(
         "keyup",
         this.roomIdKeyupListener_,
+        false
+      );
+      this.roomRandomButtonListener_ = this.onRandomButton_.bind(this);
+      this.roomRandomButton_.addEventListener(
+        "click",
+        this.roomRandomButtonListener_,
         false
       );
       this.roomJoinButtonListener_ = this.onJoinButton_.bind(this);
@@ -2022,10 +2032,16 @@
       );
       this.startBuildingRecentRoomList_();
     };
-
+    RoomSelection.matchRandomRoomPattern = function(input) {
+      return input.match(/^\d{9}$/) !== null;
+    };
     RoomSelection.prototype.removeEventListeners = function() {
       this.roomIdInput_.removeEventListener("input", this.roomIdInputListener_);
       this.roomIdInput_.removeEventListener("keyup", this.roomIdKeyupListener_);
+      this.roomRandomButton_.removeEventListener(
+        "click",
+        this.roomRandomButtonListener_
+      );
       this.roomJoinButton_.removeEventListener(
         "click",
         this.roomJoinButtonListener_
@@ -2090,6 +2106,10 @@
         return;
       }
       this.onJoinButton_();
+    };
+    RoomSelection.prototype.onRandomButton_ = function() {
+      this.roomIdInput_.value = randomString(9);
+      this.onRoomIdInput_();
     };
     RoomSelection.prototype.onJoinButton_ = function() {
       this.loadRoom_(this.roomIdInput_.value);
@@ -2693,6 +2713,8 @@
       } else {
         var path = this.getWssPostUrl();
         var xhr = new XMLHttpRequest();
+      /*   xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.setRequestHeader("Authorization", "Bearer " + params.authtoken); */
         xhr.open("POST", path, true);
         xhr.send(wssMessage.msg);
       }
@@ -3118,8 +3140,8 @@
           resolve(xhr.responseText);
         };
         xhr = new XMLHttpRequest();
-        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhr.setRequestHeader("Authorization", "Bearer " + params.authtoken);
+    /*     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.setRequestHeader("Authorization", "Bearer " + params.authtoken); */
         
         if (async) {
           xhr.onreadystatechange = function() {

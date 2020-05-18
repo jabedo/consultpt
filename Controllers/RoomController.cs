@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
 
 namespace app.Controllers
@@ -36,8 +37,12 @@ namespace app.Controllers
         }
 
         [HttpPost("message")]
-        public ActionResult SendMessage(Guid roomId,  Guid clientId, bool async)
+        public async Task<IActionResult> SendMessage(Guid roomId,  Guid clientId, bool async)
         {
+            if(async)
+            {
+              
+            }
             return new JsonResult(roomId);
         }
         /// <summary>
@@ -60,9 +65,8 @@ namespace app.Controllers
         [HttpPost("join")]
         public ActionResult JoinRoom(Guid roomId)
         {
-            
-           //Return SUCCESS or FULL
-            //await this._hubContext.Clients.Group(roomId.ToString()).AnswerAdded(answer);
+            //Return SUCCESS or FULL
+            this._hubContext.Clients.Group(roomId.ToString()).IncomingCall(answer);
             return new JsonResult(new { result="SUCCESS"});
         }
     }

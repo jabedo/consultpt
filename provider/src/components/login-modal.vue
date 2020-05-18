@@ -7,7 +7,7 @@
                       type="email"
                       v-model="form.email"
                       required
-                      placeholder="pearlie.kuvalis@kulasolson.uk">
+                      placeholder="Enter username">
         </b-form-input>
       </b-form-group>
       <b-form-group label="Password:" label-for="passwordInput">
@@ -25,33 +25,26 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
-import { eventBus } from '../eventBus'
+/* eslint-disable */
+import { mapActions } from 'vuex'
+
 export default {
   data () {
     return {
       form: {
-        email: 'pearlie.kuvalis@kulasolson.uk',
+         email: 'pearlie.kuvalis@kulasolson.uk',
         password: 'bogus123'
       },
       authMode: 'jwt',
     }
   },
-  created(){
-    eventBus.$on('showLogin', this.onShowHandler)
-  },
   methods: {
     ...mapActions('context', [
-      'login'
-    ]),
-    ...mapGetters("context", [
-      'roomId','email'
+     'login'
     ]),
     onSubmit (evt) {
-      this.login({ authMethod: this.authMode, credentials: this.form }).then(() => {
-        this.$refs.loginModal.hide();
-      /*    $notificationHub.onJoined(this.roomId, this.email, this.name); */
-      eventBus.$emit("loginComplete");
+      this.login({ authMethod: 'jwt', credentials: this.form }).then(() => {
+        this.$refs.loginModal.hide()
       })
     },
     onCancel (evt) {
@@ -62,11 +55,7 @@ export default {
         email: '',
         password: ''
       })
-    $notificationHub.onLeave(this.email);
-    },
-    onShowHandler() {
-     this.$refs.loginModal.show();
-    },
+    }
   }
 }
 </script>

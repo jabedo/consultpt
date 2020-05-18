@@ -15,7 +15,7 @@
                     more characters and include only letters, numbers, underscore and hyphen.</label>
             </div>
             <div id="room-id-input-buttons">
-                <button id="join-button" :disabled="!isAuthenticated">JOIN</button>
+                <button id="join-button">JOIN</button>
             </div>
         </div>
         <div id="recent-rooms">
@@ -26,16 +26,16 @@
 
     <div id="confirm-join-div" class="hidden">
         <div>Ready to join<span id="confirm-join-room-span"></span>?</div>
-        <button id="confirm-join-button" :disabled="!isAuthenticated">JOIN</button>
+        <button id="confirm-join-button">CONFIRM</button>
     </div>
 
     <footer>
         <div id="sharing-div">
-            <div id="room-link">Waiting for someone to join: <a id="room-link-href" href=""
+            <div id="room-link">Waiting for subscriber to join: <a id="room-link-href" href=""
                     target="_blank"></a></div>
         </div>
-        <div id="info-div">Code for AppRTC is available from <a href="http://github.com/webrtc/apprtc"
-                title="GitHub repo for AppRTC">github.com/webrtc/apprtc</a></div>
+        <div id="info-div">Web Pt from <a href="www.ptweb.com"
+                title="Check Us Out at ">www.ptweb.com</a></div>
         <div id="status-div"></div>
         <div id="rejoin-div" class="hidden"><span>You have left the call.</span> <button
                 id="rejoin-button">REJOIN</button><button id="new-room-button">NEW ROOM</button></div>
@@ -95,8 +95,6 @@
         <a href="//www.google.com/accounts/TOS">Terms</a>
         &#32;&#124;&#32;
         <a href="//www.google.com/policies/privacy/">Privacy</a>
-        &#32;&#124;&#32;
-        <a href="//github.com/webrtc/apprtc">Code repo</a>
     </div>
 
  
@@ -124,13 +122,10 @@ const loadingParams = {
       peerConnectionConfig: {"rtcpMuxPolicy": "require", "bundlePolicy": "max-bundle", "iceServers": ['stun:74.125.142.127:19302']},
       peerConnectionConstraints: {"optional": []},
       iceServerRequestUrl: 'https://networktraversal.googleapis.com/v1alpha/iceconfig?key=AIzaSyA2WoxRAjLTwrD7upuk9N2qdlcOch3D2wU',
-      iceServerRequestUrl: '',//  'https://networktraversal.googleapis.com/v1alpha/iceconfig?key=AIzaSyA2WoxRAjLTwrD7upuk9N2qdlcOch3D2wU',
-      iceServerTransports: '' ,
-/*    wssUrl: 'wss://apprtc-ws.webrtc.org:443/ws',
-      wssPostUrl: 'https://apprtc-ws.webrtc.org:443',  */
+      iceServerTransports: '',
       wssUrl: 'ws:10.0.0.213:443/ws',
       wssPostUrl: '10.0.0.213:443,',
-      bypassJoinConfirmation: false,
+      bypassJoinConfirmation: true,
       versionInfo: {"gitHash": "7341b731567cfcda05079363fb27de88c22059cf", "branch": "master", "time": "Mon Sep 23 10:45:26 2019 +0200"},
     };
  
@@ -146,10 +141,9 @@ export default {
       'isAuthenticated',
       'roomId',
       'jwtToken'
-    ])
+    ]),
   },
     methods: {
-
         initialize(){
         if (document.visibilityState === 'prerender') {
             document.addEventListener('visibilitychange', onVisibilityChange);
@@ -157,20 +151,28 @@ export default {
         }
         loadingParams.roomServer = 'http://localhost:5100/api/room';
         loadingParams.authtoken = this.jwtToken,
-        loadingParams.roomId = this.roomId,
+          loadingParams.roomId = this.roomId,
         appController = new apprtc.AppController(loadingParams);
-     }
+        },
+         onVisibilityChange() {
+            if (document.visibilityState === 'prerender') {
+              return;
+            }
+          document.removeEventListener('visibilitychange', onVisibilityChange);
+          initialize();
+         },
+         onReadyToChat(){
+           this.initialize();
+         }
     },
-    created(){
-         eventBus.$on("loginComplete", this.initialize);
+
+    created() {
+     eventBus.$on("readyToChat", this.onReadyToChat);
     },
-  /*   mounted() {
-      this.initialize();
-    }, */
 }
 </script>
 
-<style lang="less" scoped>
+<style scoped>
 /*
  *  Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
  *

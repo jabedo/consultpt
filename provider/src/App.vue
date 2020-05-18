@@ -1,29 +1,40 @@
 <template>
 <div id="app">
-  <nav-bar />
-  <chat-view />
+  <main-navbar />
+  <chat-view 
+    :disabled="!this.disable"
+   />
+ 
 </div>
 </template>
 
 <script>
 import { mapActions } from 'vuex'
-import NavBar from '@/components/nav-bar'
-import ChatView from '@/components/chat-view'
+import ChatView from './components/chat-view'
+import MainNavbar from './components/main-navbar'
+import { eventBus } from './eventBus'
 
 export default {
   name: 'App',
     components: {
-      NavBar,
+      MainNavbar,
       ChatView
   },
     created () {
     this.restoreContext()
+    eventBus.$on("enableChat", this.DisableChat);
   },
+  data(){return {disable: false}},
   methods: {
     ...mapActions('context', [
       'restoreContext'
-    ])
-  }
+    ]),
+    DisableChat(disable){
+      $notification-hub.$emit("setAvailability", {name: profile.name, roomId: this.roomId, })
+      eventBus.$emit("readyToChat", disable);
+    }
+  },
+ 
   
 }
 </script>

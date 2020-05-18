@@ -7,7 +7,7 @@
                       type="email"
                       v-model="form.email"
                       required
-                      placeholder="antonia.rolfson@hodkiewicz.name">
+                      placeholder="Enter username">
         </b-form-input>
       </b-form-group>
       <b-form-group label="Password:" label-for="passwordInput">
@@ -40,7 +40,7 @@ export default {
   },
   methods: {
     ...mapActions('context', [
-      'login'
+     'login'
     ]),
     onSubmit (evt) {
       this.login({ authMethod: 'jwt', credentials: this.form }).then(() => {

@@ -106,11 +106,11 @@ export default {
         .catch(console.error);
     };
 
-    notificationHub.setAvailability = (isAvailable) => {
+    notificationHub.setAvailability = (isAvailable, name, roomId) => {
       if (!startedPromise) return;
 
       return startedPromise
-        .then(() => connection.invoke("SetAvailability", isAvailable))
+        .then(() => connection.invoke("SetAvailability", isAvailable, name, roomId))
         .catch(console.error);
     };
 
