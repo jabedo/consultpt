@@ -125,7 +125,7 @@ const loadingParams = {
       iceServerTransports: '',
       wssUrl: 'ws:10.0.0.213:443/ws',
       wssPostUrl: '10.0.0.213:443,',
-      bypassJoinConfirmation: true,
+      bypassJoinConfirmation: false,
       versionInfo: {"gitHash": "7341b731567cfcda05079363fb27de88c22059cf", "branch": "master", "time": "Mon Sep 23 10:45:26 2019 +0200"},
     };
  
@@ -150,8 +150,13 @@ export default {
             return;
         }
         loadingParams.roomServer = 'http://localhost:5100/api/room';
-        loadingParams.authtoken = this.jwtToken,
-          loadingParams.roomId = this.roomId,
+        loadingParams.authtoken = this.jwtToken;
+        loadingParams.roomId = this.roomId;
+        loadingParams.axios = axios;
+        loadingParams.requestHeader = {
+          'Content-Type': 'application/json',
+          'Authorization': "Bearer " + this.jwtToken
+        };
         appController = new apprtc.AppController(loadingParams);
         },
          onVisibilityChange() {
@@ -161,8 +166,10 @@ export default {
           document.removeEventListener('visibilitychange', onVisibilityChange);
           initialize();
          },
-         onReadyToChat(){
-           this.initialize();
+         onReadyToChat(readyToChat){
+           if(readyToChat){
+             this.initialize();
+           }
          }
     },
 

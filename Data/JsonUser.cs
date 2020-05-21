@@ -15,7 +15,7 @@ namespace app.Models
       public bool IsAvailable { get; set; }
       [JsonProperty("username")]
       public String UserName { get; set; }
-
-   }
+        public string RoomId { get; internal set; }
+    }
 
 }

@@ -68,12 +68,14 @@
       rejoinDiv: "#rejoin-div",
       rejoinLink: "#rejoin-link",
       roomLinkHref: "#room-link-href",
+
       roomSelectionDiv: "#room-selection",
       roomSelectionInput: "#room-id-input",
       roomSelectionInputLabel: "#room-id-input-label",
       roomSelectionJoinButton: "#join-button",
       roomSelectionRandomButton: "#random-button",
       roomSelectionRecentList: "#recent-rooms-list",
+
       sharingDiv: "#sharing-div",
       statusDiv: "#status-div",
       videosDiv: "#videos",
@@ -82,6 +84,7 @@
     var AppController = function(loadingParams) {
       trace("Initializing; server= " + loadingParams.roomServer + ".");
       trace("Initializing; room=" + loadingParams.roomId + ".");
+  
       this.hangupSvg_ = $(UI_CONSTANTS.hangupSvg);
       this.icons_ = $(UI_CONSTANTS.icons);
       this.localVideo_ = $(UI_CONSTANTS.localVideo);
@@ -539,6 +542,7 @@
     var Call = function(params) {
       this.params_ = params;
       this.roomServer_ = params.roomServer || "";
+      this.axios_ = params.axios;
       this.channel_ = new SignalingChannel(params.wssUrl, params.wssPostUrl);
       this.channel_.onmessage = this.onRecvSignalingChannelMessage_.bind(this);
 /*       this.signalrSignaller = signalrSignaller, */
@@ -856,7 +860,8 @@
         var requestUrl = this.params_.iceServerRequestUrl;
         iceServerPromise = requestIceServers(
           requestUrl,
-          this.params_.iceServerTransports
+          this.params_.iceServerTransports,
+     /*      this.params_.authtoken */
         )
           .then(
             function(iceServers) {
@@ -984,7 +989,38 @@
             "/join/" +
             this.params_.roomId +
             window.location.search;
-          sendAsyncUrlRequest("POST", path)
+
+          this.axios_.post(path, {
+            headers: this.params_.requestHeader
+          }).then(response => { 
+
+            var responseObj = response.data;//     parseJSON(response.data);
+            if (!responseObj) {
+              reject(Error("Error parsing response JSON."));
+              return;
+            }
+            
+            if (responseObj.result !== "SUCCESS") {
+              reject(Error("Registration error: " + responseObj.result));
+              if (responseObj.result === "FULL") {
+                var getPath =
+                  this.roomServer_ +
+                  "/r/" +
+                  this.params_.roomId +
+                  window.location.search;
+                window.location.assign(getPath);
+              }
+              return;
+            }
+            trace("Joined the room.");
+            resolve(responseObj.params);
+
+          }).catch(error => { 
+            reject(Error("Failed to join the room: " + error.message));
+          });
+          
+          
+         /*  sendAsyncUrlRequest("POST", path, this.params_.authtoken)
             .then(
               function(response) {
                 var responseObj = parseJSON(response);
@@ -1013,7 +1049,7 @@
                 reject(Error("Failed to join the room: " + error.message));
                 return;
               }.bind(this)
-            );
+            ); */
         }.bind(this)
       );
     };
@@ -1033,10 +1069,9 @@
           this.params_.clientId +
           window.location.search;
         var xhr = new XMLHttpRequest();
-      /*   xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhr.setRequestHeader("Authorization", "Bearer " + params.authtoken); */
-
         xhr.open("POST", path, true);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.setRequestHeader("Authorization", "Bearer " + this.params_.authtoken);
         xhr.send(msgString);
         trace("C->GAE: " + msgString);
       } else {
@@ -2713,9 +2748,9 @@
       } else {
         var path = this.getWssPostUrl();
         var xhr = new XMLHttpRequest();
-      /*   xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhr.setRequestHeader("Authorization", "Bearer " + params.authtoken); */
         xhr.open("POST", path, true);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.setRequestHeader("Authorization", "Bearer " + this.params_.authtoken);
         xhr.send(wssMessage.msg);
       }
     };
@@ -3124,10 +3159,10 @@
       });
       return result;
     }
-    function sendAsyncUrlRequest(method, url, body) {
-      return sendUrlRequest(method, url, true, body);
+function sendAsyncUrlRequest(method, url, authtoken, body) {
+  return sendUrlRequest(method, url, true, authtoken, body);
     }
-    function sendUrlRequest(method, url, async, body) {
+function sendUrlRequest(method, url, async, authtoken, body) {
       return new Promise(function(resolve, reject) {
         var xhr;
         var reportResults = function() {
@@ -3140,9 +3175,6 @@
           resolve(xhr.responseText);
         };
         xhr = new XMLHttpRequest();
-    /*     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhr.setRequestHeader("Authorization", "Bearer " + params.authtoken); */
-        
         if (async) {
           xhr.onreadystatechange = function() {
             if (xhr.readyState !== 4) {
@@ -3152,15 +3184,21 @@
           };
         }
         xhr.open(method, url, async);
-        xhr.send(body);
+        xhr.setRequestHeader("Authorization", "Bearer " + authtoken); 
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+       /*  xhr.setRequestHeader("Access-Control-Allow-Credentials", "true");
+        xhr.setRequestHeader("Access-Control-Allow-Headers", "authorization");
+        xhr.setRequestHeader("Access-Control-Allow-Methods", method);
+        xhr.setRequestHeader("Access-Control-Allow-Origin", "http://localhost:8082"); */
+        xhr.send();
         if (!async) {
           reportResults();
         }
       });
     }
-    function requestIceServers(iceServerRequestUrl, iceTransports) {
+    function requestIceServers(iceServerRequestUrl, iceTransports, authtoken) {
       return new Promise(function(resolve, reject) {
-        sendAsyncUrlRequest("POST", iceServerRequestUrl)
+        sendAsyncUrlRequest("POST", iceServerRequestUrl, authtoken )
           .then(function(response) {
             var iceServerRequestResponse = parseJSON(response);
             if (!iceServerRequestResponse) {

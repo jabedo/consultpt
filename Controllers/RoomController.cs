@@ -29,15 +29,15 @@ namespace app.Controllers
         }
 
 
-        [HttpPost("leave")]
-        public ActionResult HangUp(Guid roomId, Guid clientId, bool async)
+        [HttpPost("leave/{roomId}/{clientId}/{async}")]
+        public ActionResult HangUp(string roomId, string clientId, bool async)
         {
             //this._hubContext.Clients..Group(id.ToString()).AnswerAdded(answer);
             return Ok("nanan");
         }
 
-        [HttpPost("message")]
-        public async Task<IActionResult> SendMessage(Guid roomId,  Guid clientId, bool async)
+        [HttpPost("message/{roomId}/{clientId}/{async}")]
+        public async Task<IActionResult> SendMessage(string roomId,  string clientId, bool async)
         {
             if(async)
             {
@@ -49,25 +49,34 @@ namespace app.Controllers
         /// TODO: This is a socket command!!!
         /// </summary>
         /// <returns></returns>
-        [HttpPost("send")]
-        public ActionResult Send()
+        [HttpPost("send/{roomId}/{clientId}/{async}")]
+        public ActionResult Send(string roomId, string clientId, bool async)
         {
             return new JsonResult("nanan");
         }
 
-        [HttpDelete("delete")]
-        public ActionResult Delete(Guid roomId, Guid clientId, bool registered, bool async)
+        [HttpDelete("delete/{roomId}/{clientId}/{registered}/{async}")]
+        public ActionResult Delete(string roomId, string clientId, bool registered, bool async)
         {
             return new JsonResult(roomId);
         }
 
 
-        [HttpPost("join")]
-        public ActionResult JoinRoom(Guid roomId)
+        [HttpPost("join/{roomId}")]
+        public IActionResult Join(string roomId)
         {
             //Return SUCCESS or FULL
-            this._hubContext.Clients.Group(roomId.ToString()).IncomingCall(answer);
-            return new JsonResult(new { result="SUCCESS"});
+            //this._hubContext.Clients.Group(roomId.ToString()).IncomingCall(answer);
+            return new JsonResult(new 
+            {
+                result = "SUCCESS" 
+            });
+
+            //return Json(new
+            //{
+            //    result = "SUCCESS"
+            //});
+
         }
     }
 }

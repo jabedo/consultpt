@@ -11,6 +11,7 @@ namespace app.Models
         public UsersDBContext(DbContextOptions<UsersDBContext> options)
            : base(options)
         {
+ 
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

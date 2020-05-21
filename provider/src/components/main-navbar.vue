@@ -15,8 +15,7 @@
         </li>
       </ul>
       <span v-if="isAuthenticated" class="navbar-text mr-2">
-     <!--    Welcome back, {{ profile.name }} -->
-       <switch-button color="#90EE90" v-model="available">Availability</switch-button>
+      Welcome,  {{ profile.name }} <switch-button color="#90EE90" v-model="available">Availability</switch-button>
       </span>
       <form v-if="isAuthenticated" class="form-inline my-2 my-lg-0">
 

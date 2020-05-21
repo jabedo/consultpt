@@ -250,23 +250,17 @@ namespace app.Hubs
         /// <param name="roomId"></param>
         /// <param name="username"></param>
         /// <param name="name"></param>
-        public async Task Join(string roomId, string username, string name)
+        public void Join(string roomId, string username)
         {
-
-            await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-
-    
-
             Users.TryGetValue(username, out ClientUser user);
             if (user != null)
             {
                 user.ConnectionId = Context.ConnectionId;
-                user.IsAvailable = true;
+                user.IsAvailable = false;
                 user.InCall = false;
                 user.RoomId = roomId;
                 SendUserListUpdate();
             }
-          
         }
 
         public  Task LeaveRoom(string roomId)
@@ -274,7 +268,7 @@ namespace app.Hubs
             return Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
         }
 
-       
+
 
         ////Use for provider
         //public async Task Join(string username)
@@ -312,9 +306,9 @@ namespace app.Hubs
         //}
 
 
-         
 
-        public void SetAvailability(bool isAvailable)
+
+        public void SetAvailability(string username, string roomId, bool isAvailable)
         {
             var userCall = GetUserCall(Context.ConnectionId);
             if (userCall != null)
@@ -322,9 +316,16 @@ namespace app.Hubs
                 //user already in a call -- do nothing
                 return;
             }
-            Users[Context.ConnectionId].IsAvailable = isAvailable;
 
-            SendUserListUpdate();
+            Users.TryGetValue(username, out ClientUser user);
+            if (user != null)
+            {
+                user.ConnectionId = Context.ConnectionId;
+                user.IsAvailable = isAvailable;
+                user.InCall = false;
+                user.RoomId = roomId.ToString();
+                SendUserListUpdate();
+            }
 
         }
 
@@ -344,7 +345,8 @@ namespace app.Hubs
                         Name = kvp.Value.Name,
                         UserName = kvp.Value.Username,
                         ConnectionId = kvp.Value.ConnectionId,
-                        IsAvailable = kvp.Value.IsAvailable
+                        IsAvailable = kvp.Value.IsAvailable,
+                        RoomId = kvp.Value.RoomId
                     });
                 }
             }

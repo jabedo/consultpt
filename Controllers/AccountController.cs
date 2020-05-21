@@ -174,7 +174,7 @@ namespace app.Controllers
                 signingCredentials: SigningCreds);
 
             var provider = _dbContext.Providers.FirstOrDefault(c => c.UserName == creds.Email);
-            var roomId = Guid.NewGuid();
+            var roomId = GetRandomString();
 
             //_hubContext.Clients.Groups("subscribers").ProviderJoined(new ClientUser 
             //{ 
@@ -190,6 +190,25 @@ namespace app.Controllers
                 roomId = roomId,
                 avatar = provider.PhotoName_URL
             });
+        }
+        private string GetRandomString()
+        {
+            int length = 7;
+
+            // creating a StringBuilder object()
+            StringBuilder str_build = new StringBuilder();
+            Random random = new Random();
+
+            char letter;
+
+            for (int i = 0; i < length; i++)
+            {
+                double flt = random.NextDouble();
+                int shift = Convert.ToInt32(Math.Floor(25 * flt));
+                letter = Convert.ToChar(shift + 65);
+                str_build.Append(letter);
+            }
+           return str_build.ToString();
         }
         private bool ValidateLogin(LoginCredentials creds)
         {

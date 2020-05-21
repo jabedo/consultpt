@@ -58,21 +58,11 @@ const store = {
         commit("setProfile", res.data);
       });
     },
-   /*  loginToken({ commit }, credentials) {
-      return axios.post("account/token", credentials).then((res) => {
-        const profile = res.data;
-        const jwtToken = res.data.token;
-        delete profile.token;
-        commit("setProfile", profile);
-        commit("setJwtToken", jwtToken);
-      });
-    }, */
     loginToken({ commit }, credentials) {
       return axios.post("account/join", credentials).then((res) => {
         const profile = res.data; // returned vals {token, name, email, role, roomId}
         const jwtToken = res.data.token;
         const roomId = res.data.roomId;
-        delete profile.token;
         commit("setProfile", profile);
         commit("setJwtToken", jwtToken);
         commit("setRoomId", roomId);

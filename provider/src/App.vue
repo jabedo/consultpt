@@ -2,14 +2,14 @@
 <div id="app">
   <main-navbar />
   <chat-view 
-    :disabled="!this.disable"
+    :disabled="!this.enable"
    />
  
 </div>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapState , mapGetters} from 'vuex'
 import ChatView from './components/chat-view'
 import MainNavbar from './components/main-navbar'
 import { eventBus } from './eventBus'
@@ -20,18 +20,28 @@ export default {
       MainNavbar,
       ChatView
   },
+ computed: {
+    ...mapState('context', [
+      'profile'
+    ]),
+    ...mapGetters('context', [
+      'roomId',
+    ]),
+  },
+
     created () {
     this.restoreContext()
-    eventBus.$on("enableChat", this.DisableChat);
+    eventBus.$on("enableChat", this.EnableChat);
   },
-  data(){return {disable: false}},
+  data(){return {enable: false}},
   methods: {
     ...mapActions('context', [
       'restoreContext'
     ]),
-    DisableChat(disable){
-      $notification-hub.$emit("setAvailability", {name: profile.name, roomId: this.roomId, })
-      eventBus.$emit("readyToChat", disable);
+    EnableChat(enable){
+      this.enable = enable;
+      this.$notificationHub.onAvailabilitySet(this.profile.email, this.roomId, enable);
+      eventBus.$emit("readyToChat", enable);
     }
   },
  

@@ -28,7 +28,7 @@ export default {
   methods: {
     toggle: function() {
       this.$emit("toggle", !this.isEnabled);
-      eventBus.$emit('enableChat', this.isEnabled)
+      eventBus.$emit('enableChat',!this.isEnabled);
     }
    
   }
