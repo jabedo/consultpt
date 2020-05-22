@@ -74,9 +74,10 @@ export default {
     };
   },
   created() {
-  /*   if($notificationHub)
-     $notificationHub.on('update-user-list', this.updateUserList); */
-      this.retrieveContacts();
+    // if(this.$notificationHub){
+    //  this.$notificationHub.on('update-user-list', this.updateUserList);
+    // }
+    this.retrieveContacts();
   },
   computed: {
     ...mapGetters({
@@ -92,27 +93,23 @@ export default {
     },
   },
   methods: {
-    ...mapActions({ fetchItems: 'retrieveContacts' }),
+    ...mapActions({ fetchItems: 'fetchContacts' }),
     ...mapActions({ retrieveContacts: 'retrieveContacts' }),
+    ...mapActions({updateContacts: 'updateContacts'}),
 
     ...mapSearchActions('contacts', { searchContacts: actionTypes.search }),
     searchChange(e) {
       this.searchText = e.target.value;
       this.searchContacts(this.searchText);
-      this.onSelectedContact(null);
+      // this.onSelectedContact(null);
     },
     onSelectedContact(e) {
       eventBus.$emit('onSelectedContact', e);
     },
-     updateUserList(userList, roomId, isAvailable) {
-       //update users list upon invoke by hub
-      //temp code
-      itemsMap.forEach(element => {
-        element.isAvailable= isAvailable,
-        element.roomId = roomId
-      });
-
-    }
+    //  updateUserList(userList) {
+    //    //update users list upon invoke by hub
+    //   this.updateContacts(userList);
+    // }
   
   },
 };

@@ -22,8 +22,8 @@ export default {
         .build();
 
       // Forward hub events through the event, so we can listen for them in the Vue components
-      connection.on("UpdateUserList", (userList, roomId, isAvailable) => {
-        notificationHub.$emit("update-user-list", { userList: userList, roomId: roomId, isAvailable:isAvailable });
+      connection.on("UpdateUserList", (userList) => {
+        notificationHub.$emit("update-user-list", { userList });
       });
       connection.on("CallAccepted", (acceptingUser) => {
         notificationHub.$emit("call-accepted", { acceptingUser });

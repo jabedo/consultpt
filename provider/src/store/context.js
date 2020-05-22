@@ -13,6 +13,7 @@ const store = {
     isAuthenticated: (state) => state.profile.name && state.profile.email,
     roomId: (state) => state.roomId,
     jwtToken: (state) => state.jwtToken,
+    clientId: (state) => state.clientId,
   },
 
   mutations: {
@@ -30,6 +31,9 @@ const store = {
     },
     setRoomId(state, roomId) {
       state.roomId = roomId;
+    },
+    setClientId(state, clientId) {
+      state.clientId = clientId;
     }
   },
 
@@ -60,12 +64,14 @@ const store = {
     },
     loginToken({ commit }, credentials) {
       return axios.post("account/join", credentials).then((res) => {
-        const profile = res.data; // returned vals {token, name, email, role, roomId}
+        const profile = res.data; // returned vals {token, name, email, role, roomId, clientId, avatar}
         const jwtToken = res.data.token;
         const roomId = res.data.roomId;
+        const clientId = res.data.clientId;
         commit("setProfile", profile);
         commit("setJwtToken", jwtToken);
         commit("setRoomId", roomId);
+        commit("setClientId", clientId);
       });
     },
     // Logout. (With JWT the request isnt strictly necessary unless the server needs some cleanup/auditing)

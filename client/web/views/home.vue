@@ -2,7 +2,7 @@
   <div>
     <h1>
       Welcome to PT Web
-      <button v-b-modal.payModal v-if="selectedContact"  @click="beforeOpenDialog()" :disabled="!isAuthenticated" class="btn btn-primary mt-2 float-right">
+      <button v-b-modal.payModal v-if="selectedContact"  @click="beforeOpenDialog()" :disabled="!canContact" class="btn btn-primary mt-2 float-right">
         <i class="fa fa-video-camera" aria-hidden="true">Chat with {{selectedContact.name}}</i>
       </button>
     </h1>
@@ -36,10 +36,14 @@ export default {
       selectedContact: null,
       authkey:'',
       amount: '',
-      clientId: ''
+      clientId: '',
     }
   },
   computed: {
+
+    canContact() {
+      return this.isAuthenticated && selectedContact.isavailable && selectedContact.roomid;
+    },
     ...mapState('context', [
       'profile'
     ]),
@@ -50,6 +54,9 @@ export default {
   created () {
     eventBus.$on('onSelectedContact', this.onContactSelected);
     eventBus.$on('onClosePayModal', this.onClosePayModal);
+    if(this.$notificationHub){
+      this.$notificationHub.$on("update-user-list", this.onContactUpdated);
+    }
     this.$http.post('/api/payments/token').then(res => {
       this.authkey = res.data.token;
       this.amount = res.data.amount;
@@ -58,8 +65,10 @@ export default {
   },
   beforeDestroy () {
       eventBus.$off('onSelectedContact', this.onContactSelected);
-      //cleanUp signalR event handlers
-      this.$notificationHub.$off('update-user-list', this.updateUserList) 
+       //cleanUp signalR event handlers
+       if(this.$notificationHub){
+          this.$notificationHub.$off('update-user-list', this.onContactUpdated)
+       }
   },
   methods: {
     onContactSelected (contact) {
@@ -69,7 +78,15 @@ export default {
       eventBus.$emit("clickToPay", { authkey: this.authkey, amount: this.amount, name: this.selectedContact.name });
     },
     onClosePayModal(){
-      
+    },
+    onContactUpdated(updatedList){
+        const first = updatedList.find(item => item.username == this.selectedContact.name);
+        if(first){
+          selectedContact.connectionid = first.connectionid;
+          selectedContact.isavailable = first.isavailable;
+          selectedContact.roomid = first.roomid;
+          selectedContact.providerclientid = first.clientId;
+      }
     },
 
   }

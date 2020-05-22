@@ -543,6 +543,7 @@
       this.params_ = params;
       this.roomServer_ = params.roomServer || "";
       this.axios_ = params.axios;
+      this.clientId_ = params.clientId;
       this.channel_ = new SignalingChannel(params.wssUrl, params.wssPostUrl);
       this.channel_.onmessage = this.onRecvSignalingChannelMessage_.bind(this);
 /*       this.signalrSignaller = signalrSignaller, */
@@ -765,7 +766,7 @@
             this.params_.isInitiator = roomParams.is_initiator === "true";
             this.params_.messages = roomParams.messages;
           }.bind(this)
-        )
+      )
         .catch(
           function(error) {
             this.onError_("Room server join error: " + error.message);
@@ -988,7 +989,9 @@
             this.roomServer_ +
             "/join/" +
             this.params_.roomId +
-            window.location.search;
+            window.location.search
+            + "/" + this.params_.clientId 
+            + "/" + $(UI_CONSTANTS.newRoomLink)
 
           this.axios_.post(path, {
             headers: this.params_.requestHeader
@@ -1013,7 +1016,7 @@
               return;
             }
             trace("Joined the room.");
-            resolve(responseObj.params);
+            resolve(responseObj.params1);
 
           }).catch(error => { 
             reject(Error("Failed to join the room: " + error.message));

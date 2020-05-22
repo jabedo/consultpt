@@ -29,13 +29,13 @@
 <script>
 /* eslint-disable */
 import { mapGetters, mapState  } from 'vuex';
-import PayModal from '@/components/pay-modal'
+// import PayModal from '@/components/pay-modal'
 import { eventBus } from '../eventBus';
 
 export default {
-  components: {
-    PayModal
-  },
+  // components: {
+  //   PayModal
+  // },
   created() {
       eventBus.$on("afterClose", this.killDialog);
   },

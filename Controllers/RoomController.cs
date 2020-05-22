@@ -62,14 +62,24 @@ namespace app.Controllers
         }
 
 
-        [HttpPost("join/{roomId}")]
-        public IActionResult Join(string roomId)
+        [HttpPost("join/{roomId}/{clientId}/{roomLinkId}")]
+        public  IActionResult Join(string roomId, string clientId, string roomLinkId)
         {
             //Return SUCCESS or FULL
             //this._hubContext.Clients.Group(roomId.ToString()).IncomingCall(answer);
+
+             //_hubContext.Clients.Group(roomId).JoinRoom(roomId);
+
             return new JsonResult(new 
             {
-                result = "SUCCESS" 
+                result = "SUCCESS",
+                params1 = new { 
+                    client_id = clientId,
+                    room_id = roomId,
+                    room_link = roomLinkId,
+                    is_initiator = true,
+                    messages =""
+                }
             });
 
             //return Json(new

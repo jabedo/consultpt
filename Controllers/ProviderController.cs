@@ -33,9 +33,9 @@ namespace ConsultPT.APIs.Controllers
         {
             var providers = _context.Providers.Select(c => new ProviderInfo
             {
-                Id = c.Id,
+                Id = Guid.NewGuid().ToString(),
                 Bio = c.Bio,
-                ConnectionId = null,
+                ConnectionId = string.Empty,
                 InCall = false,
                 LicenseNumber = c.IDLicenceNumber,
                 StateRegistered = c.LicenseState,
@@ -45,7 +45,7 @@ namespace ConsultPT.APIs.Controllers
                 UserType = UserType.provider,
                 PhoneNumber = c.PhoneNumber,
                 Name = string.Format("{0} {1}", c.FirstName.TrimEnd(), c.LastName.TrimEnd()),
-                Address = c.City,
+                Address = c.Address,
                 PhotoName = c.PhotoName_URL,
                 Avatar = c.PhotoName_URL,
                 Words = c.Bio.Substring(0, 150)

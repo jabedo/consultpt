@@ -107,8 +107,6 @@ import adapter from 'webrtc-adapter';
 import apprtc from '../store/apprtc'
 import axios from "axios";
 import { eventBus } from '../eventBus'
-
-
   
 const roomServer = 'http://localhost:5100/api/room/';
 const loadingParams = {
@@ -140,7 +138,9 @@ export default {
     ...mapGetters('context', [
       'isAuthenticated',
       'roomId',
-      'jwtToken'
+      'jwtToken',
+      'clientId',
+      ''
     ]),
   },
     methods: {
@@ -152,6 +152,7 @@ export default {
         loadingParams.roomServer = 'http://localhost:5100/api/room';
         loadingParams.authtoken = this.jwtToken;
         loadingParams.roomId = this.roomId;
+        loadingParams.clientId = this.clientId;
         loadingParams.axios = axios;
         loadingParams.requestHeader = {
           'Content-Type': 'application/json',

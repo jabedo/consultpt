@@ -14,8 +14,8 @@ const store = {
   getters: {
     isAuthenticated: state => state.profile.name && state.profile.email,
     jwtToken: (state) => state.jwtToken,
-    itemsMap: (state) => state.contacts,
-    generating: (state) => state.isGenerating,
+/*     itemsMap: (state) => state.contacts,
+    generating: (state) => state.isGenerating, */
   },
 
   mutations: {
@@ -31,25 +31,31 @@ const store = {
       if (jwtToken) window.localStorage.setItem('jwtToken', jwtToken)
       else window.localStorage.removeItem('jwtToken')
     },
-    setContacts(state, contacts) {
+  /*   setContacts(state, contacts) {
       Object.assign(state.contacts, contacts);
     },
     setIsGenerating(state, isGenerating) {
       state.isGenerating = isGenerating;
-    }
+    } */
   },
 
   actions: {
-    retrieveContacts({ commit,getters, state}) {
-      const contacts = [];
-      commit("setIsGenerating", true);
-    return axios.get('api/provider/all').then(res => {
-      Object.assign(contacts, res.data);
-      commit('setContacts', contacts);
-      commit("setIsGenerating", false);
-    }) 
-    
-    },
+    // retrieveContacts({ commit}) {
+    //   const contacts = [];
+    //   commit("setIsGenerating", true);
+    // return axios.get('api/provider/all').then(res => {
+    //   Object.assign(contacts, res.data);
+    //   commit('setContacts', contacts);
+    //   commit("setIsGenerating", false);
+    // }) 
+    // },
+    // updateContacts({ commit}, updatedList) {
+    //   const contacts = [];
+    //   commit("setIsGenerating", true);
+    //   Object.assign(contacts, updatedList);
+    //   commit('setContacts', contacts);
+    //   commit("setIsGenerating", false);
+    // },
     // Used during startup to reload the profile from the server
     restoreContext ({ commit, getters, state }) {
       const jwtToken = window.localStorage.getItem('jwtToken')

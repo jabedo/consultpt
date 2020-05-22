@@ -90,7 +90,7 @@ namespace app.Controllers
 
             await HttpContext.SignInAsync(Startup.JWTAuthScheme, principal);
 
-           
+
             return Json(new
             {
                 name = principal.Identity.Name,
@@ -153,7 +153,7 @@ namespace app.Controllers
         }
 
         [HttpPost("join")]
-        public IActionResult Join([FromBody]LoginCredentials creds)
+        public  IActionResult Join([FromBody]LoginCredentials creds)
         {
             if (!ValidateLogin(creds))
             {
@@ -174,20 +174,26 @@ namespace app.Controllers
                 signingCredentials: SigningCreds);
 
             var provider = _dbContext.Providers.FirstOrDefault(c => c.UserName == creds.Email);
-            var roomId = GetRandomString();
 
-            //_hubContext.Clients.Groups("subscribers").ProviderJoined(new ClientUser 
-            //{ 
+            var roomId = GetRandomString();
+            var clientId = GetRandomString();
+     
+            //_hubContext.Clients.All.RoomCreated(new ClientUser
+            //{
             //    Username = provider.UserName,
-            //    RoomId = roomId.ToString(),
+            //    RoomId = roomId,
+            //    ClientId = clientId
             //});
+
+    
             return Json(new
             {
                 token = _tokenHandler.WriteToken(token),
                 name = principal.Identity.Name,
                 email = principal.FindFirstValue(ClaimTypes.Email),
                 role = principal.FindFirstValue(ClaimTypes.Role),
-                roomId = roomId,
+                roomId,
+                clientId,
                 avatar = provider.PhotoName_URL
             });
         }

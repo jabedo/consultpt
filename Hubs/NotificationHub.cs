@@ -16,6 +16,9 @@ namespace app.Hubs
         Task IncomingCall(JsonUser callingUser);
         Task ReceiveSignal(JsonUser signalingUser, string signal);
         Task CallEnded(string endingUserID,string reason);
+        //void JoinRoom(string roomId, string clientId);
+        //void RoomCreated(ClientUser clientUser);
+        //Task CreateRoom(string roomId, string clientId);
     }
     [Authorize]
     public class NotificationHub: Hub<INotificationHub>
@@ -24,6 +27,21 @@ namespace app.Hubs
         private static readonly List<UserCall> UserCalls = new List<UserCall>();
         private static readonly List<CallOffer> CallOffers = new List<CallOffer>();
         private readonly UsersDBContext _context;
+
+        public async Task JoinRoom(string roomName, JsonUser user, bool notify)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
+            if (notify)
+            {
+                await Clients.Group(roomName).IncomingCall(user);
+            }
+        }
+
+        public async Task LeaveRoom(JsonUser user)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, user.RoomId);
+            await Clients.Group(user.RoomId).CallEnded(user.UserName,"");
+        }
 
         public NotificationHub(UsersDBContext context)
         {
@@ -263,10 +281,10 @@ namespace app.Hubs
             }
         }
 
-        public  Task LeaveRoom(string roomId)
-        {
-            return Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
-        }
+        //public  Task LeaveRoom(string roomId)
+        //{
+        //    return Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
+        //}
 
 
 
@@ -308,7 +326,7 @@ namespace app.Hubs
 
 
 
-        public void SetAvailability(string username, string roomId, bool isAvailable)
+        public async Task SetAvailability(string username, string roomId, string clientId,bool isAvailable)
         {
             var userCall = GetUserCall(Context.ConnectionId);
             if (userCall != null)
@@ -317,13 +335,23 @@ namespace app.Hubs
                 return;
             }
 
+            if (isAvailable)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+            }
+            else
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
+            }
+
             Users.TryGetValue(username, out ClientUser user);
             if (user != null)
             {
                 user.ConnectionId = Context.ConnectionId;
                 user.IsAvailable = isAvailable;
                 user.InCall = false;
-                user.RoomId = roomId.ToString();
+                user.ClientId = clientId;
+                user.RoomId = roomId;
                 SendUserListUpdate();
             }
 

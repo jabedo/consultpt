@@ -1,18 +1,21 @@
 /* eslint-disable */
-/* import faker from 'faker' */
+import faker from 'faker'
 import * as mutationTypes from './mutation-types'
 import axios from 'axios'
 
-/* const GenerateDataWorker = require("worker-loader?inline=true!../worker/generate-data.js");
+const GenerateDataWorker = require("worker-loader?inline=true!../worker/generate-data.js");
 const gdWorker = Worker ? new GenerateDataWorker() : null;
- */
+
 
 export default {
 
   retrieveContacts({ commit }) {
     commit(mutationTypes.SET_GENERATING, { generating: true });
     axios.get('api/provider/all').then(res => {
-      const contacts = res.data;
+      const contacts = {};
+      res.data.forEach((item, index, array) => {
+          contacts[item.id]= item
+       });
       commit(mutationTypes.SET_CONTACTS, { contacts });
       commit(mutationTypes.SET_GENERATING, { generating: false });
     })
