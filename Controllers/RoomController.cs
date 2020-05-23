@@ -39,6 +39,7 @@ namespace app.Controllers
         [HttpPost("message/{roomId}/{clientId}/{async}")]
         public async Task<IActionResult> SendMessage(string roomId,  string clientId, bool async)
         {
+            await _hubContext.Clients.All.OnSendMessage(roomId, clientId);
             if(async)
             {
               
@@ -63,12 +64,12 @@ namespace app.Controllers
 
 
         [HttpPost("join/{roomId}/{clientId}/{roomLinkId}")]
-        public  IActionResult Join(string roomId, string clientId, string roomLinkId)
+        public async Task<IActionResult> Join(string roomId, string clientId, string roomLinkId)
         {
             //Return SUCCESS or FULL
             //this._hubContext.Clients.Group(roomId.ToString()).IncomingCall(answer);
 
-             //_hubContext.Clients.Group(roomId).JoinRoom(roomId);
+          await  _hubContext.Clients.Group(roomId).OnRoomJoined(clientId);
 
             return new JsonResult(new 
             {
@@ -81,12 +82,6 @@ namespace app.Controllers
                     messages =""
                 }
             });
-
-            //return Json(new
-            //{
-            //    result = "SUCCESS"
-            //});
-
         }
     }
 }

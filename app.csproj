@@ -49,6 +49,7 @@
 
   <ItemGroup>
     <Compile Remove="Controllers\QuestionController.cs" />
+    <Compile Remove="Hubs\NotifyHub.cs" />
     <Compile Remove="Utilities\ImageSaveUtility.cs" />
   </ItemGroup>
 

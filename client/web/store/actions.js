@@ -13,7 +13,7 @@ export default {
     commit(mutationTypes.SET_GENERATING, { generating: true });
     axios.get('api/provider/all').then(res => {
       const contacts = {};
-      res.data.forEach((item, index, array) => {
+      res.data.forEach((item, _index, _array) => {
           contacts[item.id]= item
        });
       commit(mutationTypes.SET_CONTACTS, { contacts });
@@ -31,12 +31,6 @@ export default {
           address: ["address", "streetAddress"],
           avatar: ["image", "avatar"],
           words: { path: ["random", "words"], args: [10] },
-  /*         title: ["name", "jobTitle"],
-          bio: ["name", "jobDescriptor"],
-          
-          phone: ["phone", "phoneNumber"],
-          bio: ["name", "jobDescriptor"],
-          state: ["address", "stateAbbr"], */
         }
       });
 

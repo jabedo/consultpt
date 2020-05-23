@@ -152,8 +152,14 @@ namespace app.Controllers
             });
         }
 
+
+        /// <summary>
+        /// Used by provider to log into system
+        /// </summary>
+        /// <param name="creds"></param>
+        /// <returns></returns>
         [HttpPost("join")]
-        public  IActionResult Join([FromBody]LoginCredentials creds)
+        public  async Task<IActionResult> Join([FromBody]LoginCredentials creds)
         {
             if (!ValidateLogin(creds))
             {
@@ -176,16 +182,8 @@ namespace app.Controllers
             var provider = _dbContext.Providers.FirstOrDefault(c => c.UserName == creds.Email);
 
             var roomId = GetRandomString();
-            var clientId = GetRandomString();
-     
-            //_hubContext.Clients.All.RoomCreated(new ClientUser
-            //{
-            //    Username = provider.UserName,
-            //    RoomId = roomId,
-            //    ClientId = clientId
-            //});
+            await _hubContext.Clients.All.OnRoomCreated(roomId);
 
-    
             return Json(new
             {
                 token = _tokenHandler.WriteToken(token),
@@ -193,7 +191,7 @@ namespace app.Controllers
                 email = principal.FindFirstValue(ClaimTypes.Email),
                 role = principal.FindFirstValue(ClaimTypes.Role),
                 roomId,
-                clientId,
+                provider.Id,
                 avatar = provider.PhotoName_URL
             });
         }

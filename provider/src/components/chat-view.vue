@@ -6,27 +6,25 @@
         <video id="local-video" autoplay playsinline muted></video>
     </div>
 
-    <div id="room-selection" class="hidden">
+    <div v-if="canChat" id="room-selection">
         <h1>Pt Web</h1>
         <div>
-            <div id="room-id-input-div">
-                <input type="text" id="room-id-input" autofocus />
-                <label class="error-label hidden" for="room-id-input" id="room-id-input-label">Room name must be 5 or
-                    more characters and include only letters, numbers, underscore and hyphen.</label>
+            <div id="room-id-input-div" class="hidden">
+                <input type="text" id="room-id-input" readonly autofocus />
             </div>
             <div id="room-id-input-buttons">
                 <button id="join-button">JOIN</button>
             </div>
         </div>
-        <div id="recent-rooms">
+   <!--      <div id="recent-rooms">
             <p>Recently used rooms:</p>
             <ul id="recent-rooms-list"></ul>
-        </div>
+        </div> -->
     </div>
 
     <div id="confirm-join-div" class="hidden">
         <div>Ready to join<span id="confirm-join-room-span"></span>?</div>
-        <button id="confirm-join-button">CONFIRM</button>
+        <button id="confirm-join-button">JOIN</button>
     </div>
 
     <footer>
@@ -123,6 +121,8 @@ const loadingParams = {
       iceServerTransports: '',
       wssUrl: 'ws:10.0.0.213:443/ws',
       wssPostUrl: '10.0.0.213:443,',
+    /*   wssUrl: 'ws:127.0.0.1:5100',
+      wssPostUrl: '127.0.0.1:5100', */
       bypassJoinConfirmation: false,
       versionInfo: {"gitHash": "7341b731567cfcda05079363fb27de88c22059cf", "branch": "master", "time": "Mon Sep 23 10:45:26 2019 +0200"},
     };
@@ -130,7 +130,11 @@ const loadingParams = {
 var appController;
 
 export default {
-
+  data(){
+    return {
+      isAvailable: false
+    }
+  },
  computed: {
     ...mapState('context', [
       'profile'
@@ -139,9 +143,11 @@ export default {
       'isAuthenticated',
       'roomId',
       'jwtToken',
-      'clientId',
-      ''
+      'clientId'
     ]),
+    canChat(){
+      return this.isAuthenticated && this.isAvailable;
+    }
   },
     methods: {
         initialize(){
@@ -169,7 +175,12 @@ export default {
          },
          onReadyToChat(readyToChat){
            if(readyToChat){
-             this.initialize();
+              this.isAvailable = true;
+              this.initialize();
+           }
+           else
+           {
+             this.isAvailable =false;
            }
          }
     },

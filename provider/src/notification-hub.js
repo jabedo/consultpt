@@ -23,6 +23,7 @@ export default {
 
       // Forward hub events through the event, so we can listen for them in the Vue components
       connection.on("UpdateUserList", (userList) => {
+        console.log("Update user list called on provider!")
         notificationHub.$emit("update-user-list", userList);
       });
       connection.on("CallAccepted", (acceptingUser) => {
@@ -82,11 +83,19 @@ export default {
 
     // Provide methods for components to send messages back to server
     // Make sure no invocation happens until the connection is established
-    notificationHub.onJoined = (roomId) => {
+    notificationHub.OnRoomCreated = (roomId) => {
       if (!startedPromise) return;
 
       return startedPromise
-        .then(() => connection.invoke("JoinRoom", {roomId: roomId, user: null, notify: false }))
+        .then(() => connection.invoke("CreateRoom", {roomId }))
+        .catch(console.error);
+    };
+
+    notificationHub.OnRoomJoined = (roomId) => {
+      if (!startedPromise) return;
+
+      return startedPromise
+        .then(() => connection.invoke("JoinRoom", { roomId: roomId, user: null, notify: false }))
         .catch(console.error);
     };
     notificationHub.onLeave = (username) => {
@@ -109,7 +118,10 @@ export default {
       if (!startedPromise) return;
 
       return startedPromise
-        .then(() => connection.invoke("SetAvailability", username, roomId, clientId, isAvailable))
+        .then(() => {
+          connection.invoke("SetAvailability", username, roomId, clientId, isAvailable)
+          console.log("set availability callled on provider!!")
+        })
         .catch(console.error);
     };
 

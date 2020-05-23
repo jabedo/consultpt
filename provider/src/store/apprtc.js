@@ -138,30 +138,32 @@
             this.roomSelection_ = null;
             this.localStream_ = null;
             this.remoteVideoResetTimer_ = null;
-            if (this.loadingParams_.roomId) {
-              this.createCall_();
-              if (
-                !RoomSelection.matchRandomRoomPattern(
-                  this.loadingParams_.roomId
-                )
-              ) {
-                $(UI_CONSTANTS.confirmJoinRoomSpan).textContent =
-                  ' "' + this.loadingParams_.roomId + '"';
-              }
-              var confirmJoinDiv = $(UI_CONSTANTS.confirmJoinDiv);
-              this.show_(confirmJoinDiv);
-              $(UI_CONSTANTS.confirmJoinButton).onclick = function() {
-                this.hide_(confirmJoinDiv);
-                var recentlyUsedList = new RoomSelection.RecentlyUsedList();
-                recentlyUsedList.pushRecentRoom(this.loadingParams_.roomId);
-                this.finishCallSetup_(this.loadingParams_.roomId);
-              }.bind(this);
-              if (this.loadingParams_.bypassJoinConfirmation) {
-                $(UI_CONSTANTS.confirmJoinButton).onclick();
-              }
-            } else {
-              this.showRoomSelection_();
-            }
+            // if (this.loadingParams_.roomId) {
+            //   this.createCall_();
+            //   if (
+            //     !RoomSelection.matchRandomRoomPattern(
+            //       this.loadingParams_.roomId
+            //     )
+            //   ) {
+            //     $(UI_CONSTANTS.confirmJoinRoomSpan).textContent =
+            //       ' "' + this.loadingParams_.roomId + '"';
+            //   }
+            //   var confirmJoinDiv = $(UI_CONSTANTS.confirmJoinDiv);
+            //   this.show_(confirmJoinDiv);
+            //   $(UI_CONSTANTS.confirmJoinButton).onclick = function() {
+            //     this.hide_(confirmJoinDiv);
+            //     var recentlyUsedList = new RoomSelection.RecentlyUsedList();
+            //     recentlyUsedList.pushRecentRoom(this.loadingParams_.roomId);
+            //     this.finishCallSetup_(this.loadingParams_.roomId);
+            //   }.bind(this);
+            //   if (this.loadingParams_.bypassJoinConfirmation) {
+            //     $(UI_CONSTANTS.confirmJoinButton).onclick();
+            //   }
+            // } else {
+
+            this.showRoomSelection_(this.loadingParams_.roomId);
+
+            // }
           }.bind(this)
         )
         .catch(
@@ -211,9 +213,9 @@
       this.call_.onstatusmessage = this.displayStatus_.bind(this);
       this.call_.oncallerstarted = this.displaySharingInfo_.bind(this);
     };
-    AppController.prototype.showRoomSelection_ = function() {
+AppController.prototype.showRoomSelection_ = function (roomId) {
       var roomSelectionDiv = $(UI_CONSTANTS.roomSelectionDiv);
-      this.roomSelection_ = new RoomSelection(roomSelectionDiv, UI_CONSTANTS);
+  this.roomSelection_ = new RoomSelection(roomId,roomSelectionDiv, UI_CONSTANTS);
       this.show_(roomSelectionDiv);
       this.roomSelection_.onRoomSelected = function(roomName) {
         this.hide_(roomSelectionDiv);
@@ -2015,7 +2017,8 @@
         }
       }
     };
-    var RoomSelection = function(
+var RoomSelection = function (
+      roomId,
       roomSelectionDiv,
       uiConstants,
       recentRoomsKey,
@@ -2032,13 +2035,13 @@
       this.roomJoinButton_ = this.roomSelectionDiv_.querySelector(
         uiConstants.roomSelectionJoinButton
       );
-      this.roomRandomButton_ = this.roomSelectionDiv_.querySelector(
-        uiConstants.roomSelectionRandomButton
-      );
+      // this.roomRandomButton_ = this.roomSelectionDiv_.querySelector(
+      //   uiConstants.roomSelectionRandomButton
+      // );
       this.roomRecentList_ = this.roomSelectionDiv_.querySelector(
         uiConstants.roomSelectionRecentList
       );
-      this.roomIdInput_.value = randomString(9);
+      this.roomIdInput_.value = roomId;
       this.onRoomIdInput_();
       this.roomIdInputListener_ = this.onRoomIdInput_.bind(this);
       this.roomIdInput_.addEventListener(
@@ -2052,12 +2055,12 @@
         this.roomIdKeyupListener_,
         false
       );
-      this.roomRandomButtonListener_ = this.onRandomButton_.bind(this);
+ /*      this.roomRandomButtonListener_ = this.onRandomButton_.bind(this);
       this.roomRandomButton_.addEventListener(
         "click",
         this.roomRandomButtonListener_,
         false
-      );
+      ); */
       this.roomJoinButtonListener_ = this.onJoinButton_.bind(this);
       this.roomJoinButton_.addEventListener(
         "click",
@@ -2076,15 +2079,17 @@
     RoomSelection.prototype.removeEventListeners = function() {
       this.roomIdInput_.removeEventListener("input", this.roomIdInputListener_);
       this.roomIdInput_.removeEventListener("keyup", this.roomIdKeyupListener_);
-      this.roomRandomButton_.removeEventListener(
+/*       this.roomRandomButton_.removeEventListener(
         "click",
         this.roomRandomButtonListener_
-      );
+      ); */
       this.roomJoinButton_.removeEventListener(
         "click",
         this.roomJoinButtonListener_
       );
-    };
+};
+    
+
     RoomSelection.prototype.startBuildingRecentRoomList_ = function() {
       this.recentlyUsedList_
         .getRecentRooms()
@@ -2146,7 +2151,7 @@
       this.onJoinButton_();
     };
     RoomSelection.prototype.onRandomButton_ = function() {
-      this.roomIdInput_.value = randomString(9);
+      this.roomIdInput_.value = this.loadingParams_.roomId;
       this.onRoomIdInput_();
     };
     RoomSelection.prototype.onJoinButton_ = function() {
@@ -2214,6 +2219,9 @@
         }.bind(this)
       );
     };
+ 
+
+
     function mergeConstraints(cons1, cons2) {
       if (!cons1 || !cons2) {
         return cons1 || cons2;

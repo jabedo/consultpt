@@ -31,7 +31,7 @@ namespace ConsultPT.APIs.Controllers
         [HttpGet("all")]
         public IActionResult GetProviders()
         {
-            var providers = _context.Providers.Select(c => new ProviderInfo
+            var providers = _context.Providers.Select(c => new 
             {
                 Id = Guid.NewGuid().ToString(),
                 Bio = c.Bio,
@@ -48,8 +48,9 @@ namespace ConsultPT.APIs.Controllers
                 Address = c.Address,
                 PhotoName = c.PhotoName_URL,
                 Avatar = c.PhotoName_URL,
+                ProviderID = c.Id,
                 Words = c.Bio.Substring(0, 150)
-            });
+            }); ; ;
 
 
             if(providers != null)

@@ -14,6 +14,7 @@ namespace app.Models
         public bool IsProviderAvailable { get; internal set; }
         public string RoomId { get; internal set; }
         public string ClientId { get; internal set; }
+        public long ProviderId { get; internal set; }
     }
 
 }

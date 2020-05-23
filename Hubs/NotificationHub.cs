@@ -1,6 +1,7 @@
 ﻿using app.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,47 +11,36 @@ namespace app.Hubs
 {
     public interface INotificationHub
     {
-        Task UpdateUserList(List<JsonUser> userList);
-        Task CallAccepted(JsonUser acceptingUser);
-        Task CallDeclined(string decliningUserConnId, string reason);
-        Task IncomingCall(JsonUser callingUser);
-        Task ReceiveSignal(JsonUser signalingUser, string signal);
-        Task CallEnded(string endingUserID,string reason);
-        //void JoinRoom(string roomId, string clientId);
-        //void RoomCreated(ClientUser clientUser);
-        //Task CreateRoom(string roomId, string clientId);
+        Task CallDeclined(string targetConnectionId, string v);
+        Task IncomingCall(JsonUser jsonUser);
+        Task CallEnded(string targetConnectionId, string v);
+        Task CallAccepted(JsonUser jsonUser);
+        Task UpdateUserList(List<JsonUser> users);
+        Task ReceiveSignal(JsonUser jsonUser, string signal);
+
+        Task OnRoomJoined(string roomId);
+        Task OnRoomCreated(string roomId);
+        Task OnSendMessage(string roomId, string clientId);
     }
     [Authorize]
     public class NotificationHub: Hub<INotificationHub>
     {
-        private static readonly Dictionary<String, ClientUser> Users = new Dictionary<string, ClientUser>();
+        #region members
+        private static readonly Dictionary<string, ClientUser> Users = new Dictionary<string, ClientUser>();
         private static readonly List<UserCall> UserCalls = new List<UserCall>();
         private static readonly List<CallOffer> CallOffers = new List<CallOffer>();
-        private readonly UsersDBContext _context;
+        private readonly static ConnectionMapping<string> _connections =
+                        new ConnectionMapping<string>();
+        private ILogger<NotificationHub> _logger;
+        #endregion
 
-        public async Task JoinRoom(string roomName, JsonUser user, bool notify)
+        #region ctr
+        public NotificationHub(UsersDBContext context, ILogger<NotificationHub> logger)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
-            if (notify)
-            {
-                await Clients.Group(roomName).IncomingCall(user);
-            }
-        }
-
-        public async Task LeaveRoom(JsonUser user)
-        {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, user.RoomId);
-            await Clients.Group(user.RoomId).CallEnded(user.UserName,"");
-        }
-
-        public NotificationHub(UsersDBContext context)
-        {
-            _context = context;
-
+            _logger = logger;
             if (!Users.Any())
             {
-
-                foreach (var provider in _context.Providers)
+                foreach (var provider in context.Providers)
                 {
                     Users.TryGetValue(provider.UserName, out ClientUser user);
                     if (user == null)
@@ -59,6 +49,7 @@ namespace app.Hubs
                             new ClientUser
                             {
                                 ConnectionId = String.Empty,
+                                ProviderId = provider.Id,
                                 InCall = false,
                                 IsAvailable = false,
                                 IsProviderAvailable = false,
@@ -71,23 +62,53 @@ namespace app.Hubs
                 }
             }
 
-
         }
 
+        #endregion
+
+        #region overrides
         public override Task OnConnectedAsync()
         {
-       
+            if (Context.User.Identity.IsAuthenticated)
+            {
+                _logger.LogDebug("Connection Succeeded by {0}: Connection ID {1}", Context.ConnectionId, Context.User.Identity.Name);
+                _connections.Add(Context.User.Identity.Name, Context.ConnectionId);
+
+            }
             return base.OnConnectedAsync();
         }
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
-            if(exception == null)
+            var connections =_connections.GetConnections(Context.User.Identity.Name);
+            if (!connections.Contains(Context.ConnectionId))
             {
-
+                _connections.Remove(Context.User.Identity.Name, Context.ConnectionId);
             }
             return base.OnDisconnectedAsync(exception);
         }
+
+        #endregion
+
+        #region Client Methods
+
+        public async Task CreateRoom(string roomId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+        }
+
+        public async Task RemoveFromGroup(string roomId)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
+        }
+
+        public async Task JoinRoom(string roomId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+        }
+        #endregion
+
+
         public void CallUser(string targetConnectionId)
         {
             ClientUser callingUser;
@@ -374,7 +395,8 @@ namespace app.Hubs
                         UserName = kvp.Value.Username,
                         ConnectionId = kvp.Value.ConnectionId,
                         IsAvailable = kvp.Value.IsAvailable,
-                        RoomId = kvp.Value.RoomId
+                        RoomId = kvp.Value.RoomId,
+                        ProviderId = kvp.Value.ProviderId,
                     });
                 }
             }

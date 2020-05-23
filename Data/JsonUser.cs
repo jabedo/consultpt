@@ -16,6 +16,7 @@ namespace app.Models
       [JsonProperty("username")]
       public String UserName { get; set; }
         public string RoomId { get; internal set; }
+        public long ProviderId { get; internal set; }
     }
 
 }

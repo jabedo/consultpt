@@ -6,6 +6,7 @@
         <i class="fa fa-video-camera" aria-hidden="true">Chat with {{selectedContact.name}}</i>
       </button>
     </h1>
+    <h1 v-if="this.callHappun" >This means updated list was callled</h1>
     <search-preview
         :authkey="authkey"
         :amount="amount"
@@ -37,6 +38,7 @@ export default {
       authkey:'',
       amount: '',
       clientId: '',
+      callHappun: false
     }
   },
   computed: {
@@ -80,7 +82,9 @@ export default {
     onClosePayModal(){
     },
     onContactUpdated(updatedList){
-        const first = updatedList.find(item => item.username == this.selectedContact.name);
+      this.callHappun = true;
+      console.log("Call Happun");
+        const first = updatedList.find(item => item.providerid == this.selectedContact.providerid);
         if(first){
           selectedContact.connectionid = first.connectionid;
           selectedContact.isavailable = first.isavailable;

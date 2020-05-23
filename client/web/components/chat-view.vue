@@ -126,8 +126,8 @@ const loadingParams = {
       iceServerTransports: '' ,
 /*    wssUrl: 'wss://apprtc-ws.webrtc.org:443/ws',
       wssPostUrl: 'https://apprtc-ws.webrtc.org:443',  */
-      wssUrl: 'ws:10.0.0.213:443/ws',
-      wssPostUrl: '10.0.0.213:443,',
+      wssUrl: 'wss://localhost:5100:/ws',
+      wssPostUrl: 'http://localhost:5100,',
       bypassJoinConfirmation: false,
       versionInfo: {"gitHash": "7341b731567cfcda05079363fb27de88c22059cf", "branch": "master", "time": "Mon Sep 23 10:45:26 2019 +0200"},
     };

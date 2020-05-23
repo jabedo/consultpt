@@ -16,6 +16,7 @@ namespace app.Models
         public string Avatar { get; set; }
         public string Words { get; set; }
         public string Id { get; internal set; }
+        public long ProviderID { get; internal set; }
     }
 
 }
