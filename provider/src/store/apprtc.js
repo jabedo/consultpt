@@ -172,7 +172,6 @@
           }.bind(this)
         );
     };
-
     AppController.prototype.createCall_ = function() {
       var privacyLinks = $(UI_CONSTANTS.privacyLinks);
       this.hide_(privacyLinks);
@@ -213,20 +212,21 @@
       this.call_.onstatusmessage = this.displayStatus_.bind(this);
       this.call_.oncallerstarted = this.displaySharingInfo_.bind(this);
     };
-AppController.prototype.showRoomSelection_ = function (roomId) {
-      var roomSelectionDiv = $(UI_CONSTANTS.roomSelectionDiv);
-  this.roomSelection_ = new RoomSelection(roomId,roomSelectionDiv, UI_CONSTANTS);
-      this.show_(roomSelectionDiv);
-      this.roomSelection_.onRoomSelected = function(roomName) {
-        this.hide_(roomSelectionDiv);
-        this.createCall_();
-        this.finishCallSetup_(roomName);
-        this.roomSelection_.removeEventListeners();
-        this.roomSelection_ = null;
-        if (this.localStream_) {
-          this.attachLocalStream_();
-        }
-      }.bind(this);
+    AppController.prototype.showRoomSelection_ = function (roomId) {
+          var roomSelectionDiv = $(UI_CONSTANTS.roomSelectionDiv);
+          this.roomSelection_ = new RoomSelection(roomId, roomSelectionDiv, UI_CONSTANTS);
+          this.show_(roomSelectionDiv);
+
+          this.roomSelection_.onRoomSelected = function(roomName) {
+            this.hide_(roomSelectionDiv);
+            this.createCall_();
+            this.finishCallSetup_(roomName);
+            this.roomSelection_.removeEventListeners();
+            this.roomSelection_ = null;
+            if (this.localStream_) {
+              this.attachLocalStream_();
+            }
+          }.bind(this);
     };
     AppController.prototype.setupUi_ = function() {
       this.iconEventSetup_();
@@ -2082,11 +2082,11 @@ var RoomSelection = function (
 /*       this.roomRandomButton_.removeEventListener(
         "click",
         this.roomRandomButtonListener_
-      ); */
+      ); 
       this.roomJoinButton_.removeEventListener(
         "click",
         this.roomJoinButtonListener_
-      );
+      );*/
 };
     
 
@@ -2137,11 +2137,11 @@ var RoomSelection = function (
       if (valid) {
         this.roomJoinButton_.disabled = false;
         this.roomIdInput_.classList.remove("invalid");
-        this.roomIdInputLabel_.classList.add("hidden");
+       /*  this.roomIdInputLabel_.classList.add("hidden"); */
       } else {
         this.roomJoinButton_.disabled = true;
         this.roomIdInput_.classList.add("invalid");
-        this.roomIdInputLabel_.classList.remove("hidden");
+    /*     this.roomIdInputLabel_.classList.remove("hidden"); */
       }
     };
     RoomSelection.prototype.onRoomIdKeyPress_ = function(event) {

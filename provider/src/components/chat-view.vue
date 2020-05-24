@@ -164,7 +164,7 @@ export default {
           'Content-Type': 'application/json',
           'Authorization': "Bearer " + this.jwtToken
         };
-        appController = new apprtc.AppController(loadingParams);
+         appController =  new apprtc.AppController(loadingParams);
         },
          onVisibilityChange() {
             if (document.visibilityState === 'prerender') {

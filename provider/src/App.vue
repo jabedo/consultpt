@@ -41,8 +41,9 @@ export default {
     ]),
     EnableChat(enable){
       this.enable = enable;
-      this.$notificationHub.onAvailabilitySet(this.profile.email, this.roomId, this.clientId, enable);
-      eventBus.$emit("readyToChat", enable);
+      this.$notificationHub.onAvailabilitySet(this.profile.email, this.profile.roomId, this.profile.clientId, enable).then(()=>{
+         eventBus.$emit("readyToChat", enable);
+      })
     }
   },
  

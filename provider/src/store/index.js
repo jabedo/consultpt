@@ -2,12 +2,13 @@ import Vue from "vue";
 import Vuex from "vuex";
 
 import context from "./context";
+import apprtc from './apprtc'
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
   modules: {
-    context,
+    context
   },
 });
 

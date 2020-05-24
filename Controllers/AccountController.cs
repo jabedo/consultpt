@@ -190,8 +190,8 @@ namespace app.Controllers
                 name = principal.Identity.Name,
                 email = principal.FindFirstValue(ClaimTypes.Email),
                 role = principal.FindFirstValue(ClaimTypes.Role),
-                roomId,
-                provider.Id,
+                roomId = roomId,
+                clientId = provider.Id.ToString(),
                 avatar = provider.PhotoName_URL
             });
         }
