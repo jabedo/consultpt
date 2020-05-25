@@ -22,11 +22,6 @@ const store = {
     },
     setJwtToken (state, jwtToken) {
       state.jwtToken = jwtToken
-      // WARNING: storing JWT tokens in local storage or anywhere accessible by JavaScript is a security issue!
-      // This is just for demonstrative purposes on how SignalR can be authenticated using JWT
-      // Store token securily on a real application
-      // For example, a web app can store them in cookies not accessible to JavaScript, while a native app will need to use the device secure storage
-
     },
 
   },
@@ -57,7 +52,7 @@ const store = {
         commit('setJwtToken', jwtToken)
       })
     },
-    // Logout. (With JWT the request isnt strictly necessary unless the server needs some cleanup/auditing)
+  
     logout ({ commit, state }) {
       const logoutAction = state.jwtToken
         ? Promise.resolve()
