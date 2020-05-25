@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.13.0",
+    "@microsoft/signalr": "^3.1.4",
     "bootstrap-vue": "^2.13.0",
     "core-js": "^3.6.4",
     "vue": "^2.6.11",

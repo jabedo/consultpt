@@ -2,7 +2,7 @@
   <b-modal id="payModal" ref="payModal"  :no-close-on-backdrop="true"   hide-footer title="Process Payment" >
     <b-form >
       <div class="card bg-light">
-        <div class="card-header">Payment Information</div>
+        <div class="card-header">Payment Information {{name}} </div>
         <div class="card-body">
           <div class="alert alert-danger" v-if="error">
             {{ error }}
@@ -134,13 +134,18 @@ export default {
             });
    },
     clickToPayHandler(data) {
-       this.body= "";
-       this.nonce = "";
-      this.hostedFieldsInstance = false;
-      this.error = "";
-      this.title = "Process Payment: Provider " + data.name;
-      this.initBraintree();
-  /*     eventBus.$off('clickToPay', this.clickToPayHandler); */
+
+    this.$http.post('/api/payments/token').then(res => {
+        this.authkey = res.data.token;
+        this.amount = res.data.amount;
+        this.clientId = res.data.clientId;
+      }).then(() => {
+        this.initBraintree();
+      }).then(() => {
+            eventBus.$off('clickToPay', this.clickToPayHandler);
+      });
+
+
       },
     pay() {
       if (!this.preventPaying) {

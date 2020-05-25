@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Security.Claims;
@@ -36,14 +37,16 @@ namespace app
         
 
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        public Startup(/*ILoggerFactory loggerFactory, */IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
             _env = env;
+            //_logger = loggerFactory.CreateLogger<Startup>();
         }
 
         public IConfiguration Configuration { get; }
         public IWebHostEnvironment _env;
+        //private ILogger<Startup> _logger;
 
         private string GetConString()
         {
@@ -53,6 +56,7 @@ namespace app
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
             services.AddControllers();
             services.AddCors();
 
@@ -66,7 +70,8 @@ namespace app
 
             if (_env.IsDevelopment())
             {
-                services.AddSingleton<IAuthorizationHandler, AllowAnonymous>();
+                //services.AddSingleton<IAuthorizationHandler, AllowAnonymous>();
+                ConfigureAuth(services);
             }
             else
             {
@@ -74,7 +79,7 @@ namespace app
             }
             
 
-          
+
             // Tells SignalR how to get the User unique Id from the ClaimsPrincipal
             services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
             
@@ -115,10 +120,12 @@ namespace app
 
             //ToDo Make sure to redirect in production
             //app.UseHttpsRedirection();
+
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
 
-
+            /*
             #region UseWebSocketsOptionsAO
             var webSocketOptions = new WebSocketOptions()
             {
@@ -157,6 +164,7 @@ namespace app
             });
             #endregion
 
+            */
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
@@ -167,77 +175,203 @@ namespace app
 
         private void ConfigureAuth(IServiceCollection services)
         {
-            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["TokenAuthentication:SecretKey"]));
-            // Sets the default scheme to cookies
-            services.AddAuthentication(CookieAuthScheme)
-                // Now configure specific Cookie and JWT auth options
-                .AddCookie(CookieAuthScheme, options =>
-                {
-                    // Set the cookie
-                    options.Cookie.Name = "ptweb.AuthCookie";
-                    // Set the samesite cookie parameter as none, otherwise CORS scenarios where the client uses a different domain wont work!
-                    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
-                    // Simply return 401 responses when authentication fails (as opposed to default redirecting behaviour)
-                    options.Events = new CookieAuthenticationEvents
-                    {
-                        OnRedirectToLogin = redirectContext =>
-                        {
-                            redirectContext.HttpContext.Response.StatusCode = 401;
-                            return Task.CompletedTask;
-                        }
-                    };
-                    // In order to decide the between both schemas
-                    // inspect whether there is a JWT token either in the header or query string
-                    options.ForwardDefaultSelector = ctx =>
-                    {
-                        if (ctx.Request.Query.ContainsKey("access_token")) return JWTAuthScheme;
-                        if (ctx.Request.Headers.ContainsKey("Authorization")) return JWTAuthScheme;
-                        return CookieAuthScheme;
-                    };
-                })
-                .AddJwtBearer(JWTAuthScheme, options =>
-                {
-                    // Configure JWT Bearer Auth to expect our security key
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        //LifetimeValidator = (before, expires, token, param) =>
-                        //{
-                        //    return expires > DateTime.UtcNow;
-                        //},
-                        //ValidateAudience = false,
-                        //ValidateIssuer = false,
-                        //ValidateActor = false,
-                        //ValidateLifetime = true,
-                        //IssuerSigningKey = new SymmetricSecurityKey(Encoding.Default.GetBytes("this one would be a really real secret")),
-                        //ClockSkew = TimeSpan.Zero,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = signingKey,
-                        // Validate the JWT Issuer (iss) claim
-                        ValidateIssuer = true,
-                        ValidIssuer = Configuration["TokenAuthentication:Issuer"],
-                        // Validate the JWT Audience (aud) claim
-                        ValidateAudience = true,
-                        ValidAudience = Configuration["TokenAuthentication:Audience"],
-                        // Validate the token expiry
-                        ValidateLifetime = true,
-                        // If you want to allow a certain amount of clock drift, set that here:
-                        ClockSkew = TimeSpan.Zero,
-                    };
+   
 
-                    // The JwtBearer scheme knows how to extract the token from the Authorization header
-                    // but we will need to manually extract it from the query string in the case of requests to the hub
-                    options.Events = new JwtBearerEvents
+           var key = Encoding.ASCII.GetBytes(Configuration["TokenAuthentication:SecretKey"]);
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+                x.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = ctx =>
                     {
-                        OnMessageReceived = ctx =>
+
+                        var accessToken = ctx.Request.Query["access_token"];
+
+                        // If the request is for signalling hub...
+                        var path = ctx.HttpContext.Request.Path;
+                       
+
+                        if (String.IsNullOrEmpty(path))
                         {
-                            if (ctx.Request.Query.ContainsKey("access_token"))
-                            {
-                                ctx.Token = ctx.Request.Query["access_token"];
-                            }
-                            return Task.CompletedTask;
+                            Debug.Write("Path is null");
+                            Console.WriteLine("Path is null");
                         }
-                    };
-                });
+                        else
+                        {
+                            Debug.Write(string.Format("Path {0}", path));
+                            Console.WriteLine(string.Format("Path {0}", path));
+                        }
+
+                        if (String.IsNullOrEmpty(accessToken))
+                        {
+                            Debug.Write("Access token is null");
+                            Console.WriteLine("Access token is null");
+                        }
+                        else
+                        {
+                            Debug.Write(string.Format("access token {0}", accessToken));
+                            Console.WriteLine(string.Format("access token {0}", accessToken));
+                        }
+
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            (path.StartsWithSegments("/notification-hub")))
+                        {
+                            // Read the token out of the query string
+                            ctx.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                  
+                };
+            });
+
+
+
+
+
+
+            //var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["TokenAuthentication:SecretKey"]));
+
+            //// Sets the default scheme to cookies
+            //services.AddAuthentication(JWTAuthScheme)
+            //    //// Now configure specific Cookie and JWT auth options
+            //    //.AddCookie(CookieAuthScheme, options =>
+            //    //{
+            //    //    // Set the cookie
+            //    //    options.Cookie.Name = "ptweb.AuthCookie";
+            //    //    // Set the samesite cookie parameter as none, otherwise CORS scenarios where the client uses a different domain wont work!
+            //    //    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+            //    //    // Simply return 401 responses when authentication fails (as opposed to default redirecting behaviour)
+            //    //    options.Events = new CookieAuthenticationEvents
+            //    //    {
+            //    //        OnRedirectToLogin = redirectContext =>
+            //    //        {
+            //    //            redirectContext.HttpContext.Response.StatusCode = 401;
+            //    //            return Task.CompletedTask;
+            //    //        }
+            //    //    };
+            //    //    // In order to decide the between both schemas
+            //    //    // inspect whether there is a JWT token either in the header or query string
+            //    //    options.ForwardDefaultSelector = ctx =>
+            //    //    {
+            //    //        if (ctx.Request.Query.ContainsKey("access_token")) return JWTAuthScheme;
+            //    //        if (ctx.Request.Headers.ContainsKey("Authorization")) return JWTAuthScheme;
+            //    //        return CookieAuthScheme;
+            //    //    };
+            //    //})
+            //    .AddJwtBearer(JWTAuthScheme, options =>
+            //    {
+
+            //        /*
+            //        // Configure JWT Bearer Auth to expect our security key
+            //        options.TokenValidationParameters = new TokenValidationParameters
+            //        {
+            //            //LifetimeValidator = (before, expires, token, param) =>
+            //            //{
+            //            //    return expires > DateTime.UtcNow;
+            //            //},
+            //            //ValidateAudience = false,
+            //            //ValidateIssuer = false,
+            //            //ValidateActor = false,
+            //            //ValidateLifetime = true,
+            //            //IssuerSigningKey = new SymmetricSecurityKey(Encoding.Default.GetBytes("this one would be a really real secret")),
+            //            //ClockSkew = TimeSpan.Zero,
+            //            ValidateIssuerSigningKey = true,
+            //            IssuerSigningKey = signingKey,
+            //            // Validate the JWT Issuer (iss) claim
+            //            ValidateIssuer = true,
+            //            ValidIssuer = Configuration["TokenAuthentication:Issuer"],
+            //            // Validate the JWT Audience (aud) claim
+            //            ValidateAudience = true,
+            //            ValidAudience = Configuration["TokenAuthentication:Audience"],
+            //            // Validate the token expiry
+            //            ValidateLifetime = true,
+            //            // If you want to allow a certain amount of clock drift, set that here:
+            //            ClockSkew = TimeSpan.Zero,
+                       
+            //        };
+
+            //        */
+
+
+            //        //options.Authority = "http://localhost:5000/";
+            //        //options.Audience = "http://localhost:5001/";
+            //        //options.RequireHttpsMetadata = false;
+
+
+            //        //options.Events = new JwtBearerEvents
+            //        //{
+            //        //    OnMessageReceived = context =>
+            //        //    {
+            //        //        var accessToken = context.Request.Query["access_token"];
+
+            //        //        // If the request is for our hub...
+            //        //        var path = context.HttpContext.Request.Path;
+            //        //        _logger.LogInformation("Hub Path: {0}", path);
+            //        //        if (!string.IsNullOrEmpty(accessToken) &&
+            //        //            (path.StartsWithSegments("/notification-hub")))
+            //        //        {
+            //        //            // Read the token out of the query string
+            //        //            context.Token = accessToken;
+            //        //        }
+            //        //        return Task.CompletedTask;
+            //        //    }
+            //        //};
+
+
+
+
+
+
+            //        options.Authority = "http://localhost:5000/";
+            //        options.Audience = "http://localhost:5001/";
+            //        options.RequireHttpsMetadata = false;
+
+            //        // The JwtBearer scheme knows how to extract the token from the Authorization header
+            //        // but we will need to manually extract it from the query string in the case of requests to the hub
+
+            //        options.Events = new JwtBearerEvents
+            //        {
+            //            OnMessageReceived = ctx =>
+            //            {
+            //                var accessToken = ctx.Request.Query["access_token"];
+            //                Debug.Write("Hub Token: {0}", accessToken);
+            //                //var path = ctx.HttpContext.Request.Path;
+            //                //Debug.Write("Hub Path: {0}", path);
+
+
+            //                //if (!string.IsNullOrEmpty(accessToken) &&
+            //                //    (path.StartsWithSegments("/notification-hub")))
+            //                //{
+            //                //    ctx.Token = accessToken;
+            //                //}
+
+            //                if (ctx.Request.Query.ContainsKey("access_token"))
+            //                {
+            //                    ctx.Token = accessToken;
+            //                }
+            //                return Task.CompletedTask;
+            //            }
+            //        };
+
+
+
+            //    });
 
         }
 

@@ -12,10 +12,8 @@ const store = {
   },
 
   getters: {
-    isAuthenticated: state => state.profile.name && state.profile.email,
+    isAuthenticated: state => state.profile.name && state.profile.email && state.profile.jwtToken,
     jwtToken: (state) => state.jwtToken,
-/*     itemsMap: (state) => state.contacts,
-    generating: (state) => state.isGenerating, */
   },
 
   mutations: {
@@ -31,31 +29,11 @@ const store = {
       if (jwtToken) window.localStorage.setItem('jwtToken', jwtToken)
       else window.localStorage.removeItem('jwtToken')
     },
-  /*   setContacts(state, contacts) {
-      Object.assign(state.contacts, contacts);
-    },
-    setIsGenerating(state, isGenerating) {
-      state.isGenerating = isGenerating;
-    } */
+
   },
 
   actions: {
-    // retrieveContacts({ commit}) {
-    //   const contacts = [];
-    //   commit("setIsGenerating", true);
-    // return axios.get('api/provider/all').then(res => {
-    //   Object.assign(contacts, res.data);
-    //   commit('setContacts', contacts);
-    //   commit("setIsGenerating", false);
-    // }) 
-    // },
-    // updateContacts({ commit}, updatedList) {
-    //   const contacts = [];
-    //   commit("setIsGenerating", true);
-    //   Object.assign(contacts, updatedList);
-    //   commit('setContacts', contacts);
-    //   commit("setIsGenerating", false);
-    // },
+
     // Used during startup to reload the profile from the server
     restoreContext ({ commit, getters, state }) {
       const jwtToken = window.localStorage.getItem('jwtToken')
@@ -68,17 +46,10 @@ const store = {
     },
     // Login methods. Either use cookie-based auth or jwt-based auth
     login ({ state, dispatch }, { authMethod, credentials }) {
-      const loginAction = authMethod === 'jwt'
-        ? dispatch('loginToken', credentials)
-        : dispatch('loginCookies', credentials)
-
+      const loginAction = dispatch('loginToken', credentials);
       return loginAction.then(() => Vue.prototype.startSignalR(state.jwtToken))
     },
-    loginCookies ({ commit }, credentials) {
-      return axios.post('account/login', credentials).then(res => {
-        commit('setProfile', res.data)
-      })
-    },
+  
     loginToken ({ commit }, credentials) {
       return axios.post('account/token', credentials).then(res => {
         const profile = res.data
@@ -100,15 +71,6 @@ const store = {
         return Vue.prototype.stopSignalR()
       })
     },
-    paymentAuth({ commit }, credentials) {
-      return axios.post("payments/token", credentials).then(res => {
-        const profile = res.data;
-        const jwtToken = res.data.token;
-        delete profile.token;
-        commit(mutationTypes.SET_SETPROFILE, { profile });
-        commit(mutationTypes.SET_SETTOKEN, { jwtToken });
-      });
-    }
   }
 }
 

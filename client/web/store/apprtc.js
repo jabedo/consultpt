@@ -68,12 +68,14 @@
       rejoinDiv: "#rejoin-div",
       rejoinLink: "#rejoin-link",
       roomLinkHref: "#room-link-href",
+
       roomSelectionDiv: "#room-selection",
       roomSelectionInput: "#room-id-input",
       roomSelectionInputLabel: "#room-id-input-label",
       roomSelectionJoinButton: "#join-button",
       roomSelectionRandomButton: "#random-button",
       roomSelectionRecentList: "#recent-rooms-list",
+
       sharingDiv: "#sharing-div",
       statusDiv: "#status-div",
       videosDiv: "#videos",
@@ -82,6 +84,7 @@
     var AppController = function(loadingParams) {
       trace("Initializing; server= " + loadingParams.roomServer + ".");
       trace("Initializing; room=" + loadingParams.roomId + ".");
+  
       this.hangupSvg_ = $(UI_CONSTANTS.hangupSvg);
       this.icons_ = $(UI_CONSTANTS.icons);
       this.localVideo_ = $(UI_CONSTANTS.localVideo);
@@ -135,30 +138,32 @@
             this.roomSelection_ = null;
             this.localStream_ = null;
             this.remoteVideoResetTimer_ = null;
-            if (this.loadingParams_.roomId) {
-              this.createCall_();
-              if (
-                !RoomSelection.matchRandomRoomPattern(
-                  this.loadingParams_.roomId
-                )
-              ) {
-                $(UI_CONSTANTS.confirmJoinRoomSpan).textContent =
-                  ' "' + this.loadingParams_.roomId + '"';
-              }
-              var confirmJoinDiv = $(UI_CONSTANTS.confirmJoinDiv);
-              this.show_(confirmJoinDiv);
-              $(UI_CONSTANTS.confirmJoinButton).onclick = function() {
-                this.hide_(confirmJoinDiv);
-                var recentlyUsedList = new RoomSelection.RecentlyUsedList();
-                recentlyUsedList.pushRecentRoom(this.loadingParams_.roomId);
-                this.finishCallSetup_(this.loadingParams_.roomId);
-              }.bind(this);
-              if (this.loadingParams_.bypassJoinConfirmation) {
-                $(UI_CONSTANTS.confirmJoinButton).onclick();
-              }
-            } else {
-              this.showRoomSelection_();
-            }
+            // if (this.loadingParams_.roomId) {
+            //   this.createCall_();
+            //   if (
+            //     !RoomSelection.matchRandomRoomPattern(
+            //       this.loadingParams_.roomId
+            //     )
+            //   ) {
+            //     $(UI_CONSTANTS.confirmJoinRoomSpan).textContent =
+            //       ' "' + this.loadingParams_.roomId + '"';
+            //   }
+            //   var confirmJoinDiv = $(UI_CONSTANTS.confirmJoinDiv);
+            //   this.show_(confirmJoinDiv);
+            //   $(UI_CONSTANTS.confirmJoinButton).onclick = function() {
+            //     this.hide_(confirmJoinDiv);
+            //     var recentlyUsedList = new RoomSelection.RecentlyUsedList();
+            //     recentlyUsedList.pushRecentRoom(this.loadingParams_.roomId);
+            //     this.finishCallSetup_(this.loadingParams_.roomId);
+            //   }.bind(this);
+            //   if (this.loadingParams_.bypassJoinConfirmation) {
+            //     $(UI_CONSTANTS.confirmJoinButton).onclick();
+            //   }
+            // } else {
+
+            this.showRoomSelection_(this.loadingParams_.roomId);
+
+            // }
           }.bind(this)
         )
         .catch(
@@ -167,7 +172,6 @@
           }.bind(this)
         );
     };
-
     AppController.prototype.createCall_ = function() {
       var privacyLinks = $(UI_CONSTANTS.privacyLinks);
       this.hide_(privacyLinks);
@@ -208,20 +212,21 @@
       this.call_.onstatusmessage = this.displayStatus_.bind(this);
       this.call_.oncallerstarted = this.displaySharingInfo_.bind(this);
     };
-    AppController.prototype.showRoomSelection_ = function() {
-      var roomSelectionDiv = $(UI_CONSTANTS.roomSelectionDiv);
-      this.roomSelection_ = new RoomSelection(roomSelectionDiv, UI_CONSTANTS);
-      this.show_(roomSelectionDiv);
-      this.roomSelection_.onRoomSelected = function(roomName) {
-        this.hide_(roomSelectionDiv);
-        this.createCall_();
-        this.finishCallSetup_(roomName);
-        this.roomSelection_.removeEventListeners();
-        this.roomSelection_ = null;
-        if (this.localStream_) {
-          this.attachLocalStream_();
-        }
-      }.bind(this);
+    AppController.prototype.showRoomSelection_ = function (roomId) {
+          var roomSelectionDiv = $(UI_CONSTANTS.roomSelectionDiv);
+          this.roomSelection_ = new RoomSelection(roomId, roomSelectionDiv, UI_CONSTANTS);
+          this.show_(roomSelectionDiv);
+
+          this.roomSelection_.onRoomSelected = function(roomName) {
+            this.hide_(roomSelectionDiv);
+            this.createCall_();
+            this.finishCallSetup_(roomName);
+            this.roomSelection_.removeEventListeners();
+            this.roomSelection_ = null;
+            if (this.localStream_) {
+              this.attachLocalStream_();
+            }
+          }.bind(this);
     };
     AppController.prototype.setupUi_ = function() {
       this.iconEventSetup_();
@@ -539,6 +544,8 @@
     var Call = function(params) {
       this.params_ = params;
       this.roomServer_ = params.roomServer || "";
+      this.axios_ = params.axios;
+      this.clientId_ = params.clientId;
       this.channel_ = new SignalingChannel(params.wssUrl, params.wssPostUrl);
       this.channel_.onmessage = this.onRecvSignalingChannelMessage_.bind(this);
 /*       this.signalrSignaller = signalrSignaller, */
@@ -856,7 +863,8 @@
         var requestUrl = this.params_.iceServerRequestUrl;
         iceServerPromise = requestIceServers(
           requestUrl,
-          this.params_.iceServerTransports
+          this.params_.iceServerTransports,
+     /*      this.params_.authtoken */
         )
           .then(
             function(iceServers) {
@@ -983,8 +991,41 @@
             this.roomServer_ +
             "/join/" +
             this.params_.roomId +
-            window.location.search;
-          sendAsyncUrlRequest("POST", path)
+            window.location.search
+            + "/" + this.params_.clientId 
+            + "/" + $(UI_CONSTANTS.newRoomLink)
+
+          this.axios_.post(path, {
+            headers: this.params_.requestHeader
+          }).then(response => { 
+
+            var responseObj = response.data;//     parseJSON(response.data);
+            if (!responseObj) {
+              reject(Error("Error parsing response JSON."));
+              return;
+            }
+            
+            if (responseObj.result !== "SUCCESS") {
+              reject(Error("Registration error: " + responseObj.result));
+              if (responseObj.result === "FULL") {
+                var getPath =
+                  this.roomServer_ +
+                  "/r/" +
+                  this.params_.roomId +
+                  window.location.search;
+                window.location.assign(getPath);
+              }
+              return;
+            }
+            trace("Joined the room.");
+            resolve(responseObj.params1);
+
+          }).catch(error => { 
+            reject(Error("Failed to join the room: " + error.message));
+          });
+          
+          
+         /*  sendAsyncUrlRequest("POST", path, this.params_.authtoken)
             .then(
               function(response) {
                 var responseObj = parseJSON(response);
@@ -1013,7 +1054,7 @@
                 reject(Error("Failed to join the room: " + error.message));
                 return;
               }.bind(this)
-            );
+            ); */
         }.bind(this)
       );
     };
@@ -1034,6 +1075,8 @@
           window.location.search;
         var xhr = new XMLHttpRequest();
         xhr.open("POST", path, true);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.setRequestHeader("Authorization", "Bearer " + this.params_.authtoken);
         xhr.send(msgString);
         trace("C->GAE: " + msgString);
       } else {
@@ -1974,7 +2017,8 @@
         }
       }
     };
-    var RoomSelection = function(
+var RoomSelection = function (
+      roomId,
       roomSelectionDiv,
       uiConstants,
       recentRoomsKey,
@@ -1991,13 +2035,13 @@
       this.roomJoinButton_ = this.roomSelectionDiv_.querySelector(
         uiConstants.roomSelectionJoinButton
       );
-      this.roomRandomButton_ = this.roomSelectionDiv_.querySelector(
-        uiConstants.roomSelectionRandomButton
-      );
+      // this.roomRandomButton_ = this.roomSelectionDiv_.querySelector(
+      //   uiConstants.roomSelectionRandomButton
+      // );
       this.roomRecentList_ = this.roomSelectionDiv_.querySelector(
         uiConstants.roomSelectionRecentList
       );
-      this.roomIdInput_.value = randomString(9);
+      this.roomIdInput_.value = roomId;
       this.onRoomIdInput_();
       this.roomIdInputListener_ = this.onRoomIdInput_.bind(this);
       this.roomIdInput_.addEventListener(
@@ -2011,12 +2055,12 @@
         this.roomIdKeyupListener_,
         false
       );
-      this.roomRandomButtonListener_ = this.onRandomButton_.bind(this);
+ /*      this.roomRandomButtonListener_ = this.onRandomButton_.bind(this);
       this.roomRandomButton_.addEventListener(
         "click",
         this.roomRandomButtonListener_,
         false
-      );
+      ); */
       this.roomJoinButtonListener_ = this.onJoinButton_.bind(this);
       this.roomJoinButton_.addEventListener(
         "click",
@@ -2035,15 +2079,17 @@
     RoomSelection.prototype.removeEventListeners = function() {
       this.roomIdInput_.removeEventListener("input", this.roomIdInputListener_);
       this.roomIdInput_.removeEventListener("keyup", this.roomIdKeyupListener_);
-      this.roomRandomButton_.removeEventListener(
+/*       this.roomRandomButton_.removeEventListener(
         "click",
         this.roomRandomButtonListener_
-      );
+      ); 
       this.roomJoinButton_.removeEventListener(
         "click",
         this.roomJoinButtonListener_
-      );
-    };
+      );*/
+};
+    
+
     RoomSelection.prototype.startBuildingRecentRoomList_ = function() {
       this.recentlyUsedList_
         .getRecentRooms()
@@ -2091,11 +2137,11 @@
       if (valid) {
         this.roomJoinButton_.disabled = false;
         this.roomIdInput_.classList.remove("invalid");
-        this.roomIdInputLabel_.classList.add("hidden");
+       /*  this.roomIdInputLabel_.classList.add("hidden"); */
       } else {
         this.roomJoinButton_.disabled = true;
         this.roomIdInput_.classList.add("invalid");
-        this.roomIdInputLabel_.classList.remove("hidden");
+    /*     this.roomIdInputLabel_.classList.remove("hidden"); */
       }
     };
     RoomSelection.prototype.onRoomIdKeyPress_ = function(event) {
@@ -2105,7 +2151,7 @@
       this.onJoinButton_();
     };
     RoomSelection.prototype.onRandomButton_ = function() {
-      this.roomIdInput_.value = randomString(9);
+      this.roomIdInput_.value = this.loadingParams_.roomId;
       this.onRoomIdInput_();
     };
     RoomSelection.prototype.onJoinButton_ = function() {
@@ -2173,6 +2219,9 @@
         }.bind(this)
       );
     };
+ 
+
+
     function mergeConstraints(cons1, cons2) {
       if (!cons1 || !cons2) {
         return cons1 || cons2;
@@ -2711,6 +2760,8 @@
         var path = this.getWssPostUrl();
         var xhr = new XMLHttpRequest();
         xhr.open("POST", path, true);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.setRequestHeader("Authorization", "Bearer " + this.params_.authtoken);
         xhr.send(wssMessage.msg);
       }
     };
@@ -3119,10 +3170,10 @@
       });
       return result;
     }
-    function sendAsyncUrlRequest(method, url, body) {
-      return sendUrlRequest(method, url, true, body);
+function sendAsyncUrlRequest(method, url, authtoken, body) {
+  return sendUrlRequest(method, url, true, authtoken, body);
     }
-    function sendUrlRequest(method, url, async, body) {
+function sendUrlRequest(method, url, async, authtoken, body) {
       return new Promise(function(resolve, reject) {
         var xhr;
         var reportResults = function() {
@@ -3147,15 +3198,21 @@
           };
         }
         xhr.open(method, url, async);
-        xhr.send(body);
+        xhr.setRequestHeader("Authorization", "Bearer " + authtoken); 
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+       /*  xhr.setRequestHeader("Access-Control-Allow-Credentials", "true");
+        xhr.setRequestHeader("Access-Control-Allow-Headers", "authorization");
+        xhr.setRequestHeader("Access-Control-Allow-Methods", method);
+        xhr.setRequestHeader("Access-Control-Allow-Origin", "http://localhost:8082"); */
+        xhr.send();
         if (!async) {
           reportResults();
         }
       });
     }
-    function requestIceServers(iceServerRequestUrl, iceTransports) {
+    function requestIceServers(iceServerRequestUrl, iceTransports, authtoken) {
       return new Promise(function(resolve, reject) {
-        sendAsyncUrlRequest("POST", iceServerRequestUrl)
+        sendAsyncUrlRequest("POST", iceServerRequestUrl, authtoken )
           .then(function(response) {
             var iceServerRequestResponse = parseJSON(response);
             if (!iceServerRequestResponse) {

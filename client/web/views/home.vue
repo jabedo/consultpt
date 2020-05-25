@@ -6,15 +6,10 @@
         <i class="fa fa-video-camera" aria-hidden="true">Chat with {{selectedContact.name}}</i>
       </button>
     </h1>
-    <h1 v-if="this.callHappun" >This means updated list was callled</h1>
+    <h1 v-if="this.callHappun" >This means updated list was called</h1>
     <search-preview
-        :authkey="authkey"
-        :amount="amount"
-        :clientId="clientId"
      />
       <pay-modal v-if="selectedContact"
-        :authkey="authkey"
-        :amount="amount"
         :name="selectedContact.name"/>
   </div>
 </template>
@@ -33,11 +28,7 @@ export default {
   },
   data () {
     return {
-      providers: [],
       selectedContact: null,
-      authkey:'',
-      amount: '',
-      clientId: '',
       callHappun: false
     }
   },
@@ -59,11 +50,7 @@ export default {
     if(this.$notificationHub){
       this.$notificationHub.$on("update-user-list", this.onContactUpdated);
     }
-    this.$http.post('/api/payments/token').then(res => {
-      this.authkey = res.data.token;
-      this.amount = res.data.amount;
-      this.clientId = res.data.clientId;
-    });
+   
   },
   beforeDestroy () {
       eventBus.$off('onSelectedContact', this.onContactSelected);
@@ -77,14 +64,14 @@ export default {
       this.selectedContact= contact;
     },
     beforeOpenDialog(){
-      eventBus.$emit("clickToPay", { authkey: this.authkey, amount: this.amount, name: this.selectedContact.name });
+      eventBus.$emit("clickToPay");
     },
     onClosePayModal(){
     },
     onContactUpdated(updatedList){
       this.callHappun = true;
       console.log("Call Happun");
-        const first = updatedList.find(item => item.providerid == this.selectedContact.providerid);
+        const first = updatedList.find(item => item.clientId == this.selectedContact.clientId);
         if(first){
           selectedContact.connectionid = first.connectionid;
           selectedContact.isavailable = first.isavailable;

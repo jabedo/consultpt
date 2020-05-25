@@ -14,33 +14,32 @@
         {{ words }}
       </div>
     </div>
- <!--      <h1>
+      <h1>
        <button v-b-modal.payModal :disabled="!isAuthenticated" class="btn btn-secondary mt-2 mr-2 float-right">
           <i class="fa fa-video-camera"></i>Please pay to chat with {{ name }}
         </button>
       </h1>
       <pay-modal 
-        :authkey="authkey"
-        :amount="amount"
-        :name="name"/> -->
+        :name="name"/>
   </div>
 </template>
 
 <script>
 /* eslint-disable */
 import { mapGetters, mapState  } from 'vuex';
-// import PayModal from '@/components/pay-modal'
+import PayModal from '@/components/pay-modal'
 import { eventBus } from '../eventBus';
 
 export default {
-  // components: {
-  //   PayModal
-  // },
+  components: {
+    PayModal
+  },
   created() {
       eventBus.$on("afterClose", this.killDialog);
+      eventBus.$on()
   },
   props: [
-   'avatar', 'words','name','address'/* ,'phone','state','isavailable','status' */, 'authkey','amount'
+   'avatar', 'words','name','address'/* ,'phone','state','isavailable','status' */,
   ]
   ,
  computed: {
@@ -50,8 +49,8 @@ export default {
   },
   methods: {
      beforeOpenDialog () {
-      eventBus.$emit("clickToPay", { authkey: this.authkey, amount: this.amount, name: this.name })
-    },
+       eventBus.$emit("clickToPay");
+     },
     killDialog(){
     
     }

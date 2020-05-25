@@ -10,9 +10,6 @@
               :words ="this.selectedContact.words"
               :name ="this.selectedContact.name"
               :address ="this.selectedContact.address"
-              :authkey ="this.authkey"
-              :amount ="this.amount"
-              :clientId ="this.clientId"
               >
             </provider-bio>
           </div>
@@ -29,7 +26,7 @@ export default {
     ListContacts,
     ProviderBio,
   },
-  props: ['authkey', 'amount', 'clientId'],
+
   created() {
       eventBus.$on('paymentcancelled', this.onPaymentCancelled);
       eventBus.$on('paymentauthorized', this.onPaymentAuthorized);
@@ -47,7 +44,7 @@ export default {
     },
    onPaymentCancelled() {},
     onPaymentAuthorized() {
-       this.$router.push({ name: "Chat", params: { id:this.clientId }   /* , params: { name: this.selectedContact.name, clientId: this.connID }  */});
+       this.$router.push({ name: "Chat", params: { id:this.selectedContact.clientId }   /* , params: { name: this.selectedContact.name, clientId: this.connID }  */});
     },
   },
 };

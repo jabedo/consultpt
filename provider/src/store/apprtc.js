@@ -3186,6 +3186,9 @@ function sendUrlRequest(method, url, async, authtoken, body) {
           resolve(xhr.responseText);
         };
         xhr = new XMLHttpRequest();
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.setRequestHeader("Authorization", "Bearer " + params.authtoken);
+        
         if (async) {
           xhr.onreadystatechange = function() {
             if (xhr.readyState !== 4) {

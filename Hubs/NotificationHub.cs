@@ -42,23 +42,19 @@ namespace app.Hubs
             {
                 foreach (var provider in context.Providers)
                 {
-                    Users.TryGetValue(provider.UserName, out ClientUser user);
-                    if (user == null)
-                    {
-                        Users.Add(provider.UserName,
-                            new ClientUser
-                            {
-                                ConnectionId = String.Empty,
-                                ProviderId = provider.Id,
-                                InCall = false,
-                                IsAvailable = false,
-                                IsProviderAvailable = false,
-                                Name = string.Format("{0} {1}", provider.FirstName.TrimEnd(), provider.LastName.TrimEnd()),
-                                Username = provider.UserName,
-                                UserType = UserType.provider,
-                            }
-                            );
-                    }
+                    Users.Add(provider.Id.ToString(),
+                                new ClientUser
+                                {
+                                    ConnectionId = String.Empty,
+                                    ClientId = provider.Id.ToString(),
+                                    InCall = false,
+                                    IsAvailable = false,
+                                    IsProviderAvailable = false,
+                                    Name = string.Format("{0} {1}", provider.FirstName.TrimEnd(), provider.LastName.TrimEnd()),
+                                    Username = provider.UserName,
+                                    UserType = UserType.provider,
+                                }
+                                );
                 }
             }
 
@@ -69,11 +65,14 @@ namespace app.Hubs
         #region overrides
         public override Task OnConnectedAsync()
         {
-            if (Context.User.Identity.IsAuthenticated)
+            if (Context.User.Identity != null)
             {
-                _logger.LogDebug("Connection Succeeded by {0}: Connection ID {1}", Context.ConnectionId, Context.User.Identity.Name);
-                _connections.Add(Context.User.Identity.Name, Context.ConnectionId);
+                _logger.LogDebug("Connection Succeeded by {0}: Connection ID {1}", Context.User.Identity.Name, Context.ConnectionId);
 
+                if (!string.IsNullOrEmpty(Context.User.Identity.Name))
+                {
+                    _connections.Add(Context.User.Identity.Name, Context.ConnectionId);
+                }
             }
             return base.OnConnectedAsync();
         }
@@ -81,9 +80,13 @@ namespace app.Hubs
         public override Task OnDisconnectedAsync(Exception exception)
         {
             var connections =_connections.GetConnections(Context.User.Identity.Name);
+
             if (!connections.Contains(Context.ConnectionId))
             {
-                _connections.Remove(Context.User.Identity.Name, Context.ConnectionId);
+                foreach (string connection in connections)
+                {
+                    _connections.Remove(Context.User.Identity.Name, connection);
+                }
             }
             return base.OnDisconnectedAsync(exception);
         }
@@ -111,8 +114,15 @@ namespace app.Hubs
 
         public void CallUser(string targetConnectionId)
         {
+           
+
+
+
+
             ClientUser callingUser;
             Users.TryGetValue(Context.ConnectionId, out callingUser);
+
+
 
             ClientUser targetUser;
             Users.TryGetValue(targetConnectionId, out targetUser);
@@ -358,14 +368,14 @@ namespace app.Hubs
 
             if (isAvailable)
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+              await  Groups.AddToGroupAsync(Context.ConnectionId, roomId);
             }
             else
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
             }
 
-            Users.TryGetValue(username, out ClientUser user);
+            Users.TryGetValue(clientId, out ClientUser user);
             if (user != null)
             {
                 user.ConnectionId = Context.ConnectionId;
@@ -373,6 +383,7 @@ namespace app.Hubs
                 user.InCall = false;
                 user.ClientId = clientId;
                 user.RoomId = roomId;
+                _logger.LogDebug("SetAvailability hit on server connectionID: {0} User {1}", Context.ConnectionId, Context.User.Identity.Name);
                 SendUserListUpdate();
             }
 
@@ -396,7 +407,7 @@ namespace app.Hubs
                         ConnectionId = kvp.Value.ConnectionId,
                         IsAvailable = kvp.Value.IsAvailable,
                         RoomId = kvp.Value.RoomId,
-                        ProviderId = kvp.Value.ProviderId,
+                        ClientId = kvp.Value.ClientId,
                     });
                 }
             }
@@ -424,6 +435,9 @@ namespace app.Hubs
                 ConnectionId = user.ConnectionId
             };
         }
+
+
+   
         #endregion
     }
 

@@ -48,7 +48,7 @@ namespace ConsultPT.APIs.Controllers
                 Address = c.Address,
                 PhotoName = c.PhotoName_URL,
                 Avatar = c.PhotoName_URL,
-                ProviderID = c.Id,
+                ClientId = c.Id.ToString(),
                 Words = c.Bio.Substring(0, 150)
             }); ; ;
 

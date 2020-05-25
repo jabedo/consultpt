@@ -133,15 +133,9 @@ namespace app.Controllers
                 });
             }
 
-            var principal = GetPrincipal(creds, Startup.JWTAuthScheme);
-            var issuer = _configuration["TokenAuthentication:Issuer"];
-            var audience = _configuration["TokenAuthentication:Audience"];
-            var token = new JwtSecurityToken(
-                issuer,
-                audience,
-                principal.Claims,
-                expires: DateTime.UtcNow.AddDays(30),
-                signingCredentials: SigningCreds);
+            ClaimsPrincipal principal;
+            JwtSecurityToken token;
+            GetToken(creds, out principal, out token);
 
             return Json(new
             {
@@ -159,7 +153,7 @@ namespace app.Controllers
         /// <param name="creds"></param>
         /// <returns></returns>
         [HttpPost("join")]
-        public  async Task<IActionResult> Join([FromBody]LoginCredentials creds)
+        public  IActionResult Join([FromBody]LoginCredentials creds)
         {
             if (!ValidateLogin(creds))
             {
@@ -169,20 +163,15 @@ namespace app.Controllers
                 });
             }
 
-            var principal = GetPrincipal(creds, Startup.JWTAuthScheme);
-            var issuer = _configuration["TokenAuthentication:Issuer"];
-            var audience = _configuration["TokenAuthentication:Audience"];
-            var token = new JwtSecurityToken(
-                issuer,
-                audience,
-                principal.Claims,
-                expires: DateTime.UtcNow.AddDays(30),
-                signingCredentials: SigningCreds);
+            ClaimsPrincipal principal;
+            JwtSecurityToken token;
+            GetToken(creds, out principal, out token);
 
             var provider = _dbContext.Providers.FirstOrDefault(c => c.UserName == creds.Email);
 
             var roomId = GetRandomString();
-            await _hubContext.Clients.All.OnRoomCreated(roomId);
+
+            //await _hubContext.Clients.All.OnRoomCreated(roomId);
 
             return Json(new
             {
@@ -195,6 +184,20 @@ namespace app.Controllers
                 avatar = provider.PhotoName_URL
             });
         }
+
+        private void GetToken(LoginCredentials creds, out ClaimsPrincipal principal, out JwtSecurityToken token)
+        {
+            principal = GetPrincipal(creds, Startup.JWTAuthScheme);
+            var issuer = _configuration["TokenAuthentication:Issuer"];
+            var audience = _configuration["TokenAuthentication:Audience"];
+            token = new JwtSecurityToken(
+                issuer,
+                audience,
+                principal.Claims,
+                expires: DateTime.UtcNow.AddDays(30),
+                signingCredentials: SigningCreds);
+        }
+
         private string GetRandomString()
         {
             int length = 7;

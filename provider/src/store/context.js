@@ -50,22 +50,16 @@ const store = {
     },
     // Login methods. Either use cookie-based auth or jwt-based auth
     login({ state, dispatch }, { authMethod, credentials }) {
-      const loginAction =
-        authMethod === "jwt"
-          ? dispatch("loginToken", credentials)
-          : dispatch("loginCookies", credentials);
-
+      const loginAction = dispatch("loginToken", credentials);
       return loginAction.then(() => Vue.prototype.startSignalR(state.jwtToken));
-    },
-    loginCookies({ commit }, credentials) {
-      return axios.post("account/loginprovider", credentials).then((res) => {
-        commit("setProfile", res.data);
-      });
     },
     loginToken({ commit }, credentials) {
       return axios.post("account/join", credentials).then((res) => {
-        const profile = res.data; // returned vals {token, name, email, role, roomId, clientId, avatar}
-        commit("setProfile", profile);
+        const profile = res.data; 
+        const jwtToken = res.data.token
+        delete profile.token
+        commit('setProfile', profile)
+        commit('setJwtToken', jwtToken)
       });
     },
     // Logout. (With JWT the request isnt strictly necessary unless the server needs some cleanup/auditing)
