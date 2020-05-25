@@ -31,7 +31,7 @@ export default {
   },
 
     created () {
-    this.restoreContext()
+ /*    this.restoreContext() */
     eventBus.$on("enableChat", this.EnableChat);
   },
   data(){return {enable: false}},

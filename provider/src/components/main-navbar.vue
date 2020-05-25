@@ -42,7 +42,7 @@ import SwitchButton from '@/components/switch-button'
 export default {
   data(){
     return{
-      available:false
+      available:false //switch button variable
     }
   },
   components:{

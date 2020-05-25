@@ -67,7 +67,7 @@ namespace app.Hubs
         {
             if (Context.User.Identity != null)
             {
-                _logger.LogDebug("Connection Succeeded by {0}: Connection ID {1}", Context.User.Identity.Name, Context.ConnectionId);
+                _logger.LogDebug(string.Format("Connection Succeeded by {0}: Connection ID {1}", Context.User.Identity.Name, Context.ConnectionId));
 
                 if (!string.IsNullOrEmpty(Context.User.Identity.Name))
                 {
@@ -383,7 +383,7 @@ namespace app.Hubs
                 user.InCall = false;
                 user.ClientId = clientId;
                 user.RoomId = roomId;
-                _logger.LogDebug("SetAvailability hit on server connectionID: {0} User {1}", Context.ConnectionId, Context.User.Identity.Name);
+                _logger.LogDebug(string.Format("SetAvailability hit on server connectionID: {0} User {1}", Context.ConnectionId, Context.User.Identity.Name));
                 SendUserListUpdate();
             }
 

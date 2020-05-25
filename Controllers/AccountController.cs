@@ -28,15 +28,15 @@ namespace app.Controllers
     [Route("[controller]")]
     public class AccountController : Controller
     {
-
-        // Same key configured in startup to validte the JWT tokens
-        private readonly SigningCredentials SigningCreds;//= new SigningCredentials(Startup.SecurityKey, SecurityAlgorithms.HmacSha256);
+        private readonly SigningCredentials SubscriberSigningCreds;
+        private readonly SigningCredentials ProviderSigningCreds;
         private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
 
         private readonly IConfiguration _configuration;
         private readonly ILogger<PaymentsController> _logger;
         private readonly UsersDBContext _dbContext;
         private readonly IHubContext<NotificationHub, INotificationHub> _hubContext;
+
         public  AccountController(IHubContext<NotificationHub, INotificationHub> notificationHub, IConfiguration configuration,
            UsersDBContext dbContext, ILogger<PaymentsController> logger)
         {
@@ -46,7 +46,8 @@ namespace app.Controllers
             this._logger = logger;
 
             var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration["TokenAuthentication:SecretKey"]));
-            SigningCreds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+            SubscriberSigningCreds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+            ProviderSigningCreds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha512);
         }
 
 
@@ -132,15 +133,16 @@ namespace app.Controllers
                     error = "Login failed"
                 });
             }
+            var subscriber = _dbContext.Subscribers.FirstOrDefault(c => c.UserName == creds.Email);
 
             ClaimsPrincipal principal;
             JwtSecurityToken token;
-            GetToken(creds, out principal, out token);
+            GetToken(this.SubscriberSigningCreds, creds, out principal, out token);
 
             return Json(new
             {
-                token = _tokenHandler.WriteToken(token),
-                name = principal.Identity.Name,
+                jwtToken = _tokenHandler.WriteToken(token),
+                name = subscriber.Name,
                 email = principal.FindFirstValue(ClaimTypes.Email),
                 role = principal.FindFirstValue(ClaimTypes.Role)
             });
@@ -165,7 +167,7 @@ namespace app.Controllers
 
             ClaimsPrincipal principal;
             JwtSecurityToken token;
-            GetToken(creds, out principal, out token);
+            GetToken(ProviderSigningCreds, creds, out principal, out token);
 
             var provider = _dbContext.Providers.FirstOrDefault(c => c.UserName == creds.Email);
 
@@ -175,8 +177,8 @@ namespace app.Controllers
 
             return Json(new
             {
-                token = _tokenHandler.WriteToken(token),
-                name = principal.Identity.Name,
+                jwtToken = _tokenHandler.WriteToken(token),
+                name = string.Format("{0} {1}", provider.FirstName, provider.LastName),     //  principal.Identity.Name,
                 email = principal.FindFirstValue(ClaimTypes.Email),
                 role = principal.FindFirstValue(ClaimTypes.Role),
                 roomId = roomId,
@@ -185,7 +187,7 @@ namespace app.Controllers
             });
         }
 
-        private void GetToken(LoginCredentials creds, out ClaimsPrincipal principal, out JwtSecurityToken token)
+        private void GetToken(SigningCredentials signingCreds,   LoginCredentials creds, out ClaimsPrincipal principal, out JwtSecurityToken token)
         {
             principal = GetPrincipal(creds, Startup.JWTAuthScheme);
             var issuer = _configuration["TokenAuthentication:Issuer"];
@@ -195,7 +197,7 @@ namespace app.Controllers
                 audience,
                 principal.Claims,
                 expires: DateTime.UtcNow.AddDays(30),
-                signingCredentials: SigningCreds);
+                signingCredentials: signingCreds);
         }
 
         private string GetRandomString()

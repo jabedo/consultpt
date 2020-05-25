@@ -26,8 +26,7 @@ const store = {
       // This is just for demonstrative purposes on how SignalR can be authenticated using JWT
       // Store token securily on a real application
       // For example, a web app can store them in cookies not accessible to JavaScript, while a native app will need to use the device secure storage
-      if (jwtToken) window.localStorage.setItem('jwtToken', jwtToken)
-      else window.localStorage.removeItem('jwtToken')
+
     },
 
   },
@@ -36,8 +35,7 @@ const store = {
 
     // Used during startup to reload the profile from the server
     restoreContext ({ commit, getters, state }) {
-      const jwtToken = window.localStorage.getItem('jwtToken')
-      if (jwtToken) commit('setJwtToken', jwtToken)
+    
 
       return axios.get('account/context').then(res => {
         commit('setProfile', res.data)
@@ -53,8 +51,8 @@ const store = {
     loginToken ({ commit }, credentials) {
       return axios.post('account/token', credentials).then(res => {
         const profile = res.data
-        const jwtToken = res.data.token
-        delete profile.token
+        const jwtToken = res.data.jwtToken
+      
         commit('setProfile', profile)
         commit('setJwtToken', jwtToken)
       })
