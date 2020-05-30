@@ -74,9 +74,10 @@ export default {
     };
   },
   created() {
-    // if(this.$notificationHub){
-    //  this.$notificationHub.on('update-user-list', this.updateUserList);
-    // }
+     if(this.$notificationHub){
+      this.$notificationHub.$on("update-user-status", this.onContactUpdated);
+    }
+   
     this.retrieveContacts();
   },
   computed: {
@@ -95,7 +96,7 @@ export default {
   methods: {
     ...mapActions({ fetchItems: 'fetchContacts' }),
     ...mapActions({ retrieveContacts: 'retrieveContacts' }),
-    ...mapActions({updateContacts: 'updateContacts'}),
+    ...mapActions({updateContact: 'updateContact'}),
 
     ...mapSearchActions('contacts', { searchContacts: actionTypes.search }),
     searchChange(e) {
@@ -106,10 +107,12 @@ export default {
     onSelectedContact(e) {
       eventBus.$emit('onSelectedContact', e);
     },
-    //  updateUserList(userList) {
-    //    //update users list upon invoke by hub
-    //   this.updateContacts(userList);
-    // }
+     onContactUpdated(user) {
+       this.updateContact(user).then(() => {
+
+         
+       });
+    }
   
   },
 };

@@ -125,17 +125,17 @@ namespace app
             app.UseAuthentication();
             app.UseAuthorization();
 
-            /*
+      
             #region UseWebSocketsOptionsAO
             var webSocketOptions = new WebSocketOptions()
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(120),
                 ReceiveBufferSize = 4 * 1024
             };
+            webSocketOptions.AllowedOrigins.Add("ws://localhost:8080/ws");
             webSocketOptions.AllowedOrigins.Add("http://localhost:8080");
-            webSocketOptions.AllowedOrigins.Add("https://localhost:8080");
+            webSocketOptions.AllowedOrigins.Add("ws://localhost:8082/ws");
             webSocketOptions.AllowedOrigins.Add("http://localhost:8082");
-            webSocketOptions.AllowedOrigins.Add("https://localhost:8082");
 
             app.UseWebSockets(webSocketOptions);
 #endregion
@@ -164,7 +164,7 @@ namespace app
             });
             #endregion
 
-            */
+ 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
@@ -375,17 +375,17 @@ namespace app
 
         }
 
-        private Task<ClaimsIdentity> GetIdentity(string username, string password)
-        {
+        //private Task<ClaimsIdentity> GetIdentity(string username, string password)
+        //{
            
-            if (username == "TEST" && password == "TEST123")
-            {
-                return Task.FromResult(new ClaimsIdentity(new GenericIdentity(username, "Token"), new Claim[] { }));
-            }
+        //    if (username == "TEST" && password == "TEST123")
+        //    {
+        //        return Task.FromResult(new ClaimsIdentity(new GenericIdentity(username, "Token"), new Claim[] { }));
+        //    }
 
-            // Account doesn't exist
-            return Task.FromResult<ClaimsIdentity>(null);
-        }
+        //    // Account doesn't exist
+        //    return Task.FromResult<ClaimsIdentity>(null);
+        //}
 
         #region Echo
         private async Task Echo(HttpContext context, WebSocket webSocket)
@@ -395,10 +395,12 @@ namespace app
             while (!result.CloseStatus.HasValue)
             {
                 await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
-
+                Debug.WriteLine(result.CloseStatusDescription);
+                Debug.WriteLine("WEB Sockets Called!!!");
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+            Debug.WriteLine("WEB Sockets Called!!!");
         }
         #endregion
     }

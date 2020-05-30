@@ -21,12 +21,9 @@ export default {
       ChatView
   },
  computed: {
-    ...mapState('context', [
-      'profile'
-    ]),
     ...mapGetters('context', [
       'roomId',
-      'clientId'
+      'clientId',
     ]),
   },
 
@@ -41,9 +38,10 @@ export default {
     ]),
     EnableChat(enable){
       this.enable = enable;
-      this.$notificationHub.onAvailabilitySet(this.profile.email, this.profile.roomId, this.profile.clientId, enable).then(()=>{
+      this.$notificationHub.onAvailabilitySet(this.clientId, this.roomId, enable);
+    /*   this.$notificationHub.onAvailabilitySet(this.profile.email, this.profile.roomId, this.profile.clientId, enable).then(()=>{
          eventBus.$emit("readyToChat", enable);
-      })
+      }) */
     }
   },
  

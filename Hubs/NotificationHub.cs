@@ -21,6 +21,7 @@ namespace app.Hubs
         Task OnRoomJoined(string roomId);
         Task OnRoomCreated(string roomId);
         Task OnSendMessage(string roomId, string clientId);
+        Task UpdateUserStatus(JsonUser jsonUser);
     }
     [Authorize]
     public class NotificationHub: Hub<INotificationHub>
@@ -73,6 +74,12 @@ namespace app.Hubs
                 {
                     _connections.Add(Context.User.Identity.Name, Context.ConnectionId);
                 }
+
+                foreach (ClientUser clientUser in Users.Values.Where(c => Context.User.Identity.Name == c.Username)) //probably just a single user
+                {
+                    clientUser.ConnectionId = Context.ConnectionId;
+                }
+
             }
             return base.OnConnectedAsync();
         }
@@ -88,6 +95,13 @@ namespace app.Hubs
                     _connections.Remove(Context.User.Identity.Name, connection);
                 }
             }
+
+
+            foreach (ClientUser clientUser in Users.Values.Where(c => Context.User.Identity.Name == c.Username)) //probably just a single user
+            {
+                clientUser.ConnectionId = string.Empty;
+            }
+
             return base.OnDisconnectedAsync(exception);
         }
 
@@ -357,9 +371,10 @@ namespace app.Hubs
 
 
 
-        public async Task SetAvailability(string username, string roomId, string clientId,bool isAvailable)
+        public async Task SetAvailability(string clientId, string roomId,bool isAvailable)
         {
-            var userCall = GetUserCall(Context.ConnectionId);
+
+            var userCall = GetUserCall(clientId);
             if (userCall != null)
             {
                 //user already in a call -- do nothing
@@ -378,15 +393,27 @@ namespace app.Hubs
             Users.TryGetValue(clientId, out ClientUser user);
             if (user != null)
             {
-                user.ConnectionId = Context.ConnectionId;
+                _logger.LogDebug(string.Format("Context ConnectionID: {0} User connectionId {1}", Context.ConnectionId, user.ConnectionId));
+             
                 user.IsAvailable = isAvailable;
-                user.InCall = false;
-                user.ClientId = clientId;
                 user.RoomId = roomId;
                 _logger.LogDebug(string.Format("SetAvailability hit on server connectionID: {0} User {1}", Context.ConnectionId, Context.User.Identity.Name));
-                SendUserListUpdate();
+
+                SendUserStatusUpdate(new JsonUser
+                {
+                    ClientId = user.ClientId,
+                    IsAvailable = user.IsAvailable,
+                    RoomId = roomId,
+                    ConnectionId = user.ConnectionId,
+                    Name = user.Name,
+                });
             }
 
+        }
+
+        private void SendUserStatusUpdate(JsonUser jsonUser)
+        {
+            Clients.All.UpdateUserStatus(jsonUser);
         }
 
 
@@ -396,14 +423,17 @@ namespace app.Hubs
         private  void SendUserListUpdate()
         {
             List<JsonUser> users = new List<JsonUser>();
+
+
+
+
             foreach (KeyValuePair<string, ClientUser> kvp in Users)
             {
-                if(GetUserCall(kvp.Key) != null && kvp.Value.UserType == UserType.provider)
+                if(GetUserCall(kvp.Key) == null /*&& kvp.Value.UserType == UserType.provider*/)
                 {
                     users.Add(new JsonUser
                     {
                         Name = kvp.Value.Name,
-                        UserName = kvp.Value.Username,
                         ConnectionId = kvp.Value.ConnectionId,
                         IsAvailable = kvp.Value.IsAvailable,
                         RoomId = kvp.Value.RoomId,
@@ -411,18 +441,22 @@ namespace app.Hubs
                     });
                 }
             }
-
-            if(users != null && users.Count> 0)
+            _logger.LogDebug(string.Format("Update clients list: Count {0}", users.Count));
+            if (users != null && users.Count> 0)
             {
                Clients.All.UpdateUserList(users);
+                _logger.LogDebug(string.Format("Update clients list: Count {0}", users.Count));
             }
         }
 
-        private UserCall GetUserCall(string connectionId)
+        private UserCall GetUserCall(string clientId)
         {
             var matchingCall =
-                UserCalls.SingleOrDefault(uc => uc.Users.SingleOrDefault(u => u.ConnectionId == connectionId) != null);
+                UserCalls.SingleOrDefault(uc => uc.Users.SingleOrDefault(u => u.ClientId == clientId) != null);
             return matchingCall;
+            
+            
+
         }
 
         private JsonUser GetJsonUser(ClientUser user)
@@ -430,7 +464,7 @@ namespace app.Hubs
             return new JsonUser
             {
                 Name = user.Name,
-                UserName = user.Username,
+                ClientId = user.ClientId,
                 IsAvailable = user.IsAvailable,
                 ConnectionId = user.ConnectionId
             };

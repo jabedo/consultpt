@@ -47,39 +47,41 @@ export default {
   created () {
     eventBus.$on('onSelectedContact', this.onContactSelected);
     eventBus.$on('onClosePayModal', this.onClosePayModal);
-    if(this.$notificationHub){
-      this.$notificationHub.$on("update-user-list", this.onContactUpdated);
-    }
-   
+
   },
   beforeDestroy () {
       eventBus.$off('onSelectedContact', this.onContactSelected);
        //cleanUp signalR event handlers
        if(this.$notificationHub){
-          this.$notificationHub.$off('update-user-list', this.onContactUpdated)
+          this.$notificationHub.$off('update-user-status', this.onContactUpdated)
        }
   },
   methods: {
+     ...mapActions({ 
+         updateUserStatus: 'updateUserStatus'
+       }),
     onContactSelected (contact) {
-      this.selectedContact= contact;
+      this.selectedContact = contact;
     },
     beforeOpenDialog(){
       eventBus.$emit("clickToPay");
     },
     onClosePayModal(){
     },
-    onContactUpdated(updatedList){
-      this.callHappun = true;
-      console.log("Call Happun");
-        const first = updatedList.find(item => item.clientId == this.selectedContact.clientId);
+
+/* 
+        const first = updatedList.find(item => {
+          if(item.clientId && item.clientId == this.selectedContact.clientId){
+              return item;
+          }
+        });
         if(first){
           selectedContact.connectionid = first.connectionid;
           selectedContact.isavailable = first.isavailable;
           selectedContact.roomid = first.roomid;
           selectedContact.providerclientid = first.clientId;
-      }
-    },
-
+          
+      } */
+    }
   }
-}
 </script>

@@ -34,6 +34,10 @@ export default {
       connection.on("UpdateUserList", (userList) => {
         notificationHub.$emit("update-user-list", userList);
       });
+      connection.on("UpdateUserStatus", (user) => {
+        notificationHub.$emit("update-user-status", user);
+      });
+
       connection.on("CallAccepted", (acceptingUser) => {
         notificationHub.$emit("call-accepted", { acceptingUser });
       });
@@ -122,11 +126,11 @@ export default {
         .catch(console.error);
     };
 
-    notificationHub.onAvailabilitySet = (username, roomId, clientId, isAvailable) => {
+    notificationHub.onAvailabilitySet = (clientId, roomId, isAvailable) => {
       if (!startedPromise) return;
 
       return startedPromise
-        .then(() => connection.invoke("SetAvailability", username, roomId, clientId, isAvailable))
+        .then(() => connection.invoke("SetAvailability",  clientId, roomId, isAvailable))
         .catch(console.error);
     };
 

@@ -30,8 +30,6 @@ const store = {
 
     // Used during startup to reload the profile from the server
     restoreContext ({ commit, getters, state }) {
-    
-
       return axios.get('account/context').then(res => {
         commit('setProfile', res.data)
         if (getters.isAuthenticated) return Vue.prototype.startSignalR(state.jwtToken)

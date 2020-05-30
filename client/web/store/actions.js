@@ -9,12 +9,21 @@ const gdWorker = Worker ? new GenerateDataWorker() : null;
 
 export default {
 
+  // updateUserStatus({ getters, state, dispatch,  }, { user }) {
+  //   alert("am here!")
+  //   alert("call to update user status!! clientId: "
+  //     + user.clientId + " " + "room Id " + user.roomId);
+  //   const userToUpdate = getters.currentContacts[user.clientId];
+  //   if (userToUpdate) {
+  //  /*    userToUpdate. */
+  //   }
+  //  },
   retrieveContacts({ commit }) {
     commit(mutationTypes.SET_GENERATING, { generating: true });
     axios.get('api/provider/all').then(res => {
       const contacts = {};
       res.data.forEach((item, _index, _array) => {
-          contacts[item.id]= item
+          contacts[item.clientid]= item
        });
       commit(mutationTypes.SET_CONTACTS, { contacts });
       commit(mutationTypes.SET_GENERATING, { generating: false });

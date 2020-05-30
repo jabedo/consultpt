@@ -64,12 +64,12 @@ namespace app.Controllers
 
 
         [HttpPost("join/{roomId}/{clientId}/{roomLinkId}")]
-        public async Task<IActionResult> Join(string roomId, string clientId, string roomLinkId)
+        public IActionResult Join(string roomId, string clientId, string roomLinkId)
         {
             //Return SUCCESS or FULL
             //this._hubContext.Clients.Group(roomId.ToString()).IncomingCall(answer);
 
-          await  _hubContext.Clients.Group(roomId).OnRoomJoined(clientId);
+          //await  _hubContext.Clients.Group(roomId).OnRoomJoined(clientId);
 
             return new JsonResult(new 
             {

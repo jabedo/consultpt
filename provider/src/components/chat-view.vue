@@ -119,6 +119,8 @@ const loadingParams = {
       peerConnectionConstraints: {"optional": []},
       iceServerRequestUrl: 'https://networktraversal.googleapis.com/v1alpha/iceconfig?key=AIzaSyA2WoxRAjLTwrD7upuk9N2qdlcOch3D2wU',
       iceServerTransports: '',
+/*        wssUrl: 'ws://localhost:5100/ws',
+      wssPostUrl: 'http://localhost:5100', */
       wssUrl: 'ws:10.0.0.213:443/ws',
       wssPostUrl: '10.0.0.213:443,',
     /*   wssUrl: 'ws:127.0.0.1:5100',
@@ -127,6 +129,12 @@ const loadingParams = {
       versionInfo: {"gitHash": "7341b731567cfcda05079363fb27de88c22059cf", "branch": "master", "time": "Mon Sep 23 10:45:26 2019 +0200"},
     };
  
+/* webSocketOptions.AllowedOrigins.Add("ws://localhost:8080/ws");
+            webSocketOptions.AllowedOrigins.Add("http://localhost:8080");
+            webSocketOptions.AllowedOrigins.Add("ws://localhost:8082/ws");
+            webSocketOptions.AllowedOrigins.Add("http://localhost:8082"); */
+        
+
 var appController;
 
 export default {
