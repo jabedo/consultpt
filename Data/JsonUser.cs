@@ -11,12 +11,10 @@ namespace app.Models
         public string ConnectionId { get; set; }
         [JsonProperty("isavailable")]
         public bool IsAvailable { get; set; }
-        [JsonProperty("userguid")]
-        public String UserGuidId { get; set; }
         [JsonProperty("roomid")]
         public string RoomId { get; internal set; }
         [JsonProperty("clientid")]
-        public string ClientId { get; internal set; }
+        public string Id { get; internal set; }
     }
 
 }

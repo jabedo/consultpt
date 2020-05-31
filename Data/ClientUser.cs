@@ -13,7 +13,7 @@ namespace app.Models
         public UserType UserType { get; set; }
         public bool IsProviderAvailable { get; internal set; }
         public string RoomId { get; internal set; }
-        public string ClientId { get; internal set; }
+        public string Id { get; internal set; }
     }
 
 }

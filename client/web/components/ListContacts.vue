@@ -35,6 +35,7 @@
             :name="props.item.name"
             :address="props.item.address"
             :words="props.item.words"
+            :id="props.item.id"
             :avatar="props.item.avatar"
             :search="searchText">
           </contact-detail>
@@ -43,7 +44,7 @@
     </virtual-scroller>
   </div>
 </template>
-
+'isAvailable','roomId', 'connectionId'
 <script>
 /* eslint-disable */
 import axios from 'axios'
@@ -69,21 +70,28 @@ export default {
   data() {
     return {
       searchText: '',
-          //temp
-      isAvailable: false
+      selectedId: ''
     };
   },
   created() {
      if(this.$notificationHub){
       this.$notificationHub.$on("update-user-status", this.onContactUpdated);
+     this.$notificationHub.$on("update-user-list", this.onUserListUpdated);
     }
-   
     this.retrieveContacts();
+  },
+  beforeDestroy(){
+           //cleanUp signalR event handlers
+       if(this.$notificationHub){
+          this.$notificationHub.$off('update-user-status', this.onContactUpdated)
+          this.$notificationHub.$off("update-user-list", this.onUserListUpdated);
+       }
   },
   computed: {
     ...mapGetters({
       itemsMap: 'currentContacts',
       generating: 'isGenerating',
+      selectedContact: 'selectedProvider'
     }),
     items() {
       return Object.values(this.itemsMap);
@@ -94,26 +102,42 @@ export default {
     },
   },
   methods: {
-    ...mapActions({ fetchItems: 'fetchContacts' }),
-    ...mapActions({ retrieveContacts: 'retrieveContacts' }),
-    ...mapActions({updateContact: 'updateContact'}),
+        ...mapActions({ 
+         updateUserStatus: 'updateUserStatus',
+         retrieveContacts: 'retrieveContacts',
+         fetchItems: 'fetchContacts',
+         updateUserList: 'updateUserList'
+       }),
 
     ...mapSearchActions('contacts', { searchContacts: actionTypes.search }),
     searchChange(e) {
       this.searchText = e.target.value;
       this.searchContacts(this.searchText);
-      // this.onSelectedContact(null);
+      this.onSelectedContact(null);
     },
     onSelectedContact(e) {
+      if(e){
+        this.selectedId = e.id;
+      }
       eventBus.$emit('onSelectedContact', e);
     },
      onContactUpdated(user) {
-       this.updateContact(user).then(() => {
-
-         
+       this.updateUserStatus(user).then(() => {
+         if (this.selectedId && this.selectedId === user.id){
+               eventBus.$emit("contactUpdated",user);
+         }
+       });
+    },
+    onUserListUpdated(userList){
+     this.updateUserList(userList).then(() => {
+      if(this.selectedId) {
+        const found=  userList.find(item => item.id == this.selectedId);
+        if(found){
+          eventBus.$emit("contactUpdated",found);
+        }
+      }
        });
     }
-  
   },
 };
 </script>

@@ -1,8 +1,8 @@
 <template>
-  <b-modal id="payModal" ref="payModal"  :no-close-on-backdrop="true"   hide-footer title="Process Payment" >
+  <b-modal id="payModal" ref="payModal"  :no-close-on-backdrop="true" @modal-close="resetform"  hide-footer title="Process Payment" >
     <b-form >
       <div class="card bg-light">
-        <div class="card-header">Payment Information {{name}} </div>
+        <div class="card-header">Pay to Provider: {{ getName() }} </div>
         <div class="card-body">
           <div class="alert alert-danger" v-if="error">
             {{ error }}
@@ -78,8 +78,9 @@ const currentMonth =
 const currentYear = today.getFullYear();
 
 export default {
-  created() {
-    eventBus.$on('clickToPay', this.clickToPayHandler);
+  mounted() {
+   eventBus.$on("clickToPay", this.clickToPayHandler);
+    this.triggerHidden();
   },
   data() {
     return {
@@ -88,10 +89,12 @@ export default {
       nonce: "",
       hostedFieldsInstance: false,
       error: "",
+      authkey:"",
+      amount: "",
+      id:"",
+      name:""
     };
   },
-  props: ['authkey', 'amount','name'],
-
   computed: {
     preventPaying() {
       return (
@@ -103,6 +106,12 @@ export default {
     }
   },
   methods: {
+       getName(){
+      return this.name;
+    },
+  triggerHidden(){
+     this.$emit("modal-close");
+  },
     onHidden(){
     Object.assign(this.form, {
           title: '',
@@ -111,7 +120,6 @@ export default {
           hostedFieldsInstance: false,
           error:''
         })
-       eventBus.$emit("afterClose");
     },
     resetform() {
       this. title= "";
@@ -133,20 +141,17 @@ export default {
                 console.log(err);
             });
    },
-    clickToPayHandler(data) {
-
-    this.$http.post('/api/payments/token').then(res => {
+    clickToPayHandler(name,id) {
+      this.id = id,
+      this.name = name;
+      this.resetform();
+      this.$http.post('/api/payments/token').then(res => {
         this.authkey = res.data.token;
         this.amount = res.data.amount;
-        this.clientId = res.data.clientId;
       }).then(() => {
-        this.initBraintree();
-      }).then(() => {
-            eventBus.$off('clickToPay', this.clickToPayHandler);
+         this.initBraintree();
       });
-
-
-      },
+    },
     pay() {
       if (!this.preventPaying) {
         this.error = "";

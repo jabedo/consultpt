@@ -9,24 +9,35 @@ const gdWorker = Worker ? new GenerateDataWorker() : null;
 
 export default {
 
-  // updateUserStatus({ getters, state, dispatch,  }, { user }) {
-  //   alert("am here!")
-  //   alert("call to update user status!! clientId: "
-  //     + user.clientId + " " + "room Id " + user.roomId);
-  //   const userToUpdate = getters.currentContacts[user.clientId];
-  //   if (userToUpdate) {
-  //  /*    userToUpdate. */
-  //   }
-  //  },
+  updateUserStatus({ getters  }, user ) {
+    const userToUpdate = getters.currentContacts[user.id];
+    if (userToUpdate) {
+      userToUpdate.connectionId = user.connectionId;
+      userToUpdate.isAvailable = user.isAvailable;
+      userToUpdate.roomId = user.roomId;
+    }
+  },
+  updateUserList({ getters }, userList) {
+    userList.forEach((item, _index, _array) => {
+      const userToUpdate = getters.currentContacts[item.id];
+      if (userToUpdate) {
+        userToUpdate.connectionId = item.connectionId;
+        userToUpdate.isAvailable = item.isAvailable;
+        userToUpdate.roomId = item.roomId;
+      }
+    });
+  },
+
   retrieveContacts({ commit }) {
     commit(mutationTypes.SET_GENERATING, { generating: true });
     axios.get('api/provider/all').then(res => {
-      const contacts = {};
+      const contacts = [];
       res.data.forEach((item, _index, _array) => {
-          contacts[item.clientid]= item
+          contacts[item.id]= item
        });
       commit(mutationTypes.SET_CONTACTS, { contacts });
       commit(mutationTypes.SET_GENERATING, { generating: false });
+
     })
   },
 

@@ -24,6 +24,7 @@ export default {
     address: String,
     avatar: String,
     words: String,
+    id: String,
     search: String,
   },
   computed: {

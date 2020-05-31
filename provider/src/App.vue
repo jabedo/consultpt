@@ -23,7 +23,7 @@ export default {
  computed: {
     ...mapGetters('context', [
       'roomId',
-      'clientId',
+      'id',
     ]),
   },
 
@@ -38,7 +38,7 @@ export default {
     ]),
     EnableChat(enable){
       this.enable = enable;
-      this.$notificationHub.onAvailabilitySet(this.clientId, this.roomId, enable);
+      this.$notificationHub.onAvailabilitySet(this.id, this.roomId, enable);
     /*   this.$notificationHub.onAvailabilitySet(this.profile.email, this.profile.roomId, this.profile.clientId, enable).then(()=>{
          eventBus.$emit("readyToChat", enable);
       }) */

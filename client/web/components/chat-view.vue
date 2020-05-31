@@ -137,7 +137,7 @@ var appController;
 export default {
  data() {
    return{
-      clientId: this.$route.params.id,
+      id: this.$route.params.id,
    }
  },
  computed: {

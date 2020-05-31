@@ -207,23 +207,23 @@ namespace app
 
                         if (String.IsNullOrEmpty(path))
                         {
-                            Debug.Write("Path is null");
+                            Debug.WriteLine("Path is null");
                             Console.WriteLine("Path is null");
                         }
                         else
                         {
-                            Debug.Write(string.Format("Path {0}", path));
+                            Debug.WriteLine(string.Format("Path {0}", path));
                             Console.WriteLine(string.Format("Path {0}", path));
                         }
 
                         if (String.IsNullOrEmpty(accessToken))
                         {
-                            Debug.Write("Access token is null");
+                            Debug.WriteLine("Access token is null");
                             Console.WriteLine("Access token is null");
                         }
                         else
                         {
-                            Debug.Write(string.Format("access token {0}", accessToken));
+                            Debug.WriteLine(string.Format("access token {0}", accessToken));
                             Console.WriteLine(string.Format("access token {0}", accessToken));
                         }
 

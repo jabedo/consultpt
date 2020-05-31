@@ -13,7 +13,7 @@ const store = {
     isAuthenticated: (state) => state.profile.name && state.profile.email && state.profile.jwtToken && state.profile.roomId,
     roomId: (state) => state.profile.roomId,
     jwtToken: (state) => state.jwtToken,
-    clientId: (state) => state.profile.clientId,
+    id: (state) => state.profile.id,
   },
 
   mutations: {

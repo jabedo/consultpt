@@ -151,7 +151,7 @@ export default {
       'isAuthenticated',
       'roomId',
       'jwtToken',
-      'clientId'
+      'id'
     ]),
     canChat(){
       return this.isAuthenticated && this.isAvailable;
@@ -166,7 +166,7 @@ export default {
         loadingParams.roomServer = 'http://localhost:5100/api/room';
         loadingParams.authtoken = this.jwtToken;
         loadingParams.roomId = this.roomId;
-        loadingParams.clientId = this.clientId;
+        loadingParams.clientId = this.id;
         loadingParams.axios = axios;
         loadingParams.requestHeader = {
           'Content-Type': 'application/json',

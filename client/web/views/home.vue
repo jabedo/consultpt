@@ -2,15 +2,11 @@
   <div>
     <h1>
       Welcome to PT Web
-      <button v-b-modal.payModal v-if="selectedContact"  @click="beforeOpenDialog()" :disabled="!canContact" class="btn btn-primary mt-2 float-right">
-        <i class="fa fa-video-camera" aria-hidden="true">Chat with {{selectedContact.name}}</i>
+      <button v-b-modal.payModal v-if="canBeContacted" @click="onClickToPay" class="btn btn-primary mt-2 float-right">
+        <i class="fa fa-video-camera" aria-hidden="true">Chat with {{ selectedContact.name }}</i>
       </button>
     </h1>
-    <h1 v-if="this.callHappun" >This means updated list was called</h1>
-    <search-preview
-     />
-      <pay-modal v-if="selectedContact"
-        :name="selectedContact.name"/>
+    <search-preview/>
   </div>
 </template>
 
@@ -28,60 +24,39 @@ export default {
   },
   data () {
     return {
-      selectedContact: null,
-      callHappun: false
+      selectedContact: '',
     }
   },
   computed: {
-
-    canContact() {
-      return this.isAuthenticated && selectedContact.isavailable && selectedContact.roomid;
-    },
     ...mapState('context', [
       'profile'
     ]),
     ...mapGetters('context', [
       'isAuthenticated'
     ]),
+    canBeContacted(){
+      return this.selectedContact && this.selectedContact.isAvailable && this.selectedContact.roomId && this.selectedContact.connectionId;
+    }
   },
   created () {
     eventBus.$on('onSelectedContact', this.onContactSelected);
     eventBus.$on('onClosePayModal', this.onClosePayModal);
-
   },
   beforeDestroy () {
       eventBus.$off('onSelectedContact', this.onContactSelected);
-       //cleanUp signalR event handlers
-       if(this.$notificationHub){
-          this.$notificationHub.$off('update-user-status', this.onContactUpdated)
-       }
   },
   methods: {
-     ...mapActions({ 
-         updateUserStatus: 'updateUserStatus'
-       }),
     onContactSelected (contact) {
-      this.selectedContact = contact;
+      if(contact){
+         this.selectedContact = contact;
+      }
+      else {
+        this.selectedContact ='';
+      }
     },
-    beforeOpenDialog(){
-      eventBus.$emit("clickToPay");
+    onClickToPay(){
+      eventBus.$emit("clickToPay", this.selectedContact.name, this.selectedContact.id);
     },
-    onClosePayModal(){
-    },
-
-/* 
-        const first = updatedList.find(item => {
-          if(item.clientId && item.clientId == this.selectedContact.clientId){
-              return item;
-          }
-        });
-        if(first){
-          selectedContact.connectionid = first.connectionid;
-          selectedContact.isavailable = first.isavailable;
-          selectedContact.roomid = first.roomid;
-          selectedContact.providerclientid = first.clientId;
-          
-      } */
     }
   }
 </script>

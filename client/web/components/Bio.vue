@@ -15,12 +15,11 @@
       </div>
     </div>
       <h1>
-       <button v-b-modal.payModal :disabled="!isAuthenticated" class="btn btn-secondary mt-2 mr-2 float-right">
+       <button v-b-modal.payModal  v-if="readyToBeContacted" @click="onClickToPay" class="btn btn-secondary mt-2 mr-2 float-right">
           <i class="fa fa-video-camera"></i>Please pay to chat with {{ name }}
         </button>
       </h1>
-      <pay-modal 
-        :name="name"/>
+      <pay-modal />
   </div>
 </template>
 
@@ -36,25 +35,27 @@ export default {
   },
   created() {
       eventBus.$on("afterClose", this.killDialog);
-      eventBus.$on()
+      eventBus.$on("contactUpdated", this.OnContactUpdated);
   },
   props: [
-   'avatar', 'words','name','address'/* ,'phone','state','isavailable','status' */,
+   'id', 'avatar', 'words','name','address','isAvailable','roomId', 'connectionId'
   ]
   ,
  computed: {
     ...mapGetters('context', [
       'isAuthenticated'
     ]),
+    readyToBeContacted(){
+      return this.isAvailable && this.roomId && this.connectionId;
+    }
   },
   methods: {
-     beforeOpenDialog () {
-       eventBus.$emit("clickToPay");
-     },
-    killDialog(){
-    
+    onClickToPay(){
+      eventBus.$emit("clickToPay", this.name, this.id);
+    },
+    OnContactUpdated(user){
+      /* this.user = user; */
     }
-
   }
 };
 </script>

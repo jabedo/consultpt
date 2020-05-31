@@ -73,7 +73,7 @@ namespace app.Controllers
                 name = principal.Identity.Name,
                 email = principal.FindFirstValue(ClaimTypes.Email),
                 role = principal.FindFirstValue(ClaimTypes.Role),
-                clientId = Guid.NewGuid()
+                id = Guid.NewGuid().ToString()
             });
         }
         [HttpPost("loginprovider")]
@@ -118,7 +118,8 @@ namespace app.Controllers
           return Json(new
           {
               name = this.User?.Identity?.Name,
-              email = this.User?.FindFirstValue(ClaimTypes.Email),
+              email = this.User?.FindFirstValue(ClaimTypes.Email
+              ),
               role = this.User?.FindFirstValue(ClaimTypes.Role),
           });
         }
@@ -172,8 +173,7 @@ namespace app.Controllers
             var provider = _dbContext.Providers.FirstOrDefault(c => c.UserName == creds.Email);
 
             var roomId = GetRandomString();
-
-            //await _hubContext.Clients.All.OnRoomCreated(roomId);
+         
 
             return Json(new
             {
@@ -182,7 +182,7 @@ namespace app.Controllers
                 email = principal.FindFirstValue(ClaimTypes.Email),
                 role = principal.FindFirstValue(ClaimTypes.Role),
                 roomId = roomId,
-                clientId = provider.Id.ToString(),
+                id = provider.Id.ToString(),
                 avatar = provider.PhotoName_URL
             });
         }

@@ -6,10 +6,14 @@
           </div>
           <div class="col-md-4">
             <provider-bio v-if="this.selectedContact"
+              :id="this.selectedContact.id"
               :avatar ="this.selectedContact.avatar"
               :words ="this.selectedContact.words"
               :name ="this.selectedContact.name"
               :address ="this.selectedContact.address"
+              :isAvailable="this.selectedContact.isAvailable"
+              :roomId="this.selectedContact.roomId"
+              :connectionId="this.selectedContact.connectionId"
               >
             </provider-bio>
           </div>
@@ -44,7 +48,7 @@ export default {
     },
    onPaymentCancelled() {},
     onPaymentAuthorized() {
-       this.$router.push({ name: "Chat", params: { id:this.selectedContact.clientId }   /* , params: { name: this.selectedContact.name, clientId: this.connID }  */});
+       this.$router.push({ name: "Chat", params: { id: this.selectedContact.id } });
     },
   },
 };
