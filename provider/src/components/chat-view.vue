@@ -90,9 +90,10 @@
 
     </div>
     <div id="privacy">
-        <a href="//www.google.com/accounts/TOS">Terms</a>
+        <a href="#">Terms</a>
         &#32;&#124;&#32;
-        <a href="//www.google.com/policies/privacy/">Privacy</a>
+        <a href="#">Privacy</a>
+        &#32;&#124;&#32;
     </div>
 
  
@@ -105,6 +106,8 @@ import adapter from 'webrtc-adapter';
 import apprtc from '../store/apprtc'
 import axios from "axios";
 import { eventBus } from '../eventBus'
+
+
   
 const roomServer = 'http://localhost:5100/api/room/';
 const loadingParams = {

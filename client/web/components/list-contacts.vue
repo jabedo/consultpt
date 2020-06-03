@@ -56,7 +56,7 @@ import {
   mapActions as mapSearchActions,
   mapGetters as mapSearchGetters,
 } from 'vuex-search';
-import ContactDetail from '@/components/ContactDetail';
+import ContactDetail from '@/components/contact-detail';
 import InputField from '@/components/InputField';
 import StyledButton from '@/components/StyledButton';
 import { eventBus } from '../eventBus'

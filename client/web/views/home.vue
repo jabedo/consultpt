@@ -32,7 +32,8 @@ export default {
       'profile'
     ]),
     ...mapGetters('context', [
-      'isAuthenticated'
+      'isAuthenticated',
+      'clientId'
     ]),
     canBeContacted(){
       return this.selectedContact && this.selectedContact.isAvailable && this.selectedContact.roomId && this.selectedContact.connectionId;
@@ -55,7 +56,7 @@ export default {
       }
     },
     onClickToPay(){
-      eventBus.$emit("clickToPay", this.selectedContact.name, this.selectedContact.id);
+      eventBus.$emit("clickToPay", this.selectedContact.name, this.selectedContact.id, this.clientId);
     },
     }
   }

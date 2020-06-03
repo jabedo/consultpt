@@ -56,7 +56,7 @@ namespace app.Controllers
 
         [HttpPost("process")]
         [Authorize]
-        public JsonResult Process(string nonce, string name)
+        public JsonResult Process(string nonce, string providerId, string subscriberId)
         {
             var amount = _configuration["braintree:amount"];
             var request = new TransactionRequest
@@ -74,7 +74,7 @@ namespace app.Controllers
             {
                 Transaction transaction = result.Target;
 
-                //PostPaymentToDB(transaction, name);
+                PostPaymentToDB(transaction, providerId, subscriberId);
 
                 return new JsonResult(new {id = transaction.Id });
                 //return Ok(transaction.Id);
@@ -89,7 +89,7 @@ namespace app.Controllers
 
         }
 
-        private  void PostPaymentToDB(Transaction transaction, string providerName)
+        private  void PostPaymentToDB(Transaction transaction, string providerId, string subscriberId)
         {
 
             var paypalModel = transaction.PayPalDetails;
@@ -107,13 +107,15 @@ namespace app.Controllers
                 UpdateDate = DateTime.UtcNow.ToShortDateString(),
 
             };
+
 #if DEBUG
-            return;
+            //return;
 #else
-    _dbContext.PaypalTransactions.Add(paypalTransaction);
+#endif
+            _dbContext.PaypalTransactions.Add(paypalTransaction);
             var name = HttpContext.User?.Identity?.Name;
-            var subscriber = _dbContext.Subscribers.Where(c => c.UserName == name).FirstOrDefault();
-            var provider = _dbContext.Providers.Where(c => c.UserName == providerName).FirstOrDefault();
+            var subscriber = _dbContext.Subscribers.Where(c => c.Id.ToString() == subscriberId).FirstOrDefault();
+            var provider = _dbContext.Providers.Where(c => c.Id.ToString() == providerId).FirstOrDefault();
             if (subscriber != null && provider != null)
             {
                 Payment p = new Payment
@@ -126,8 +128,8 @@ namespace app.Controllers
                 };
                 _dbContext.Payments.Add(p);
             }
-            await _dbContext.SaveChangesAsync();
-#endif
+             _dbContext.SaveChangesAsync();
+
 
         }
 

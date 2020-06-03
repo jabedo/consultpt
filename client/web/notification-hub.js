@@ -59,7 +59,7 @@ export default {
       // You need to call connection.start() to establish the connection but the client wont handle reconnecting for you!
       // Docs recommend listening onclose and handling it there.
       // This is the simplest of the strategies
- /*      function start() {
+      function start() {
         startedPromise = connection.start().catch((err) => {
           console.error("Failed to connect with hub", err);
           return new Promise((resolve, reject) =>
@@ -77,23 +77,6 @@ export default {
       connection.onclose(() => {
         if (!manuallyClosed) start();
       });
- */
-
-      async function start() {
-        try {
-          await connection.start();
-          console.log("connected");
-        } catch (err) {
-          console.log(err);
-          setTimeout(() => start(), 5000);
-        }
-      };
-
-      connection.onclose(async () => {
-        if (!manuallyClosed) await start();
-      });
-
-
 
       // Start everything
       manuallyClosed = false;

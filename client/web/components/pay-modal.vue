@@ -91,8 +91,6 @@ export default {
       error: "",
       authkey:"",
       amount: "",
-      id:"",
-      name:""
     };
   },
   computed: {
@@ -122,7 +120,7 @@ export default {
         })
     },
     resetform() {
-      this. title= "";
+      this.title= "";
       this.body= "";
       this.nonce = "";
       this.hostedFieldsInstance = false;
@@ -130,7 +128,7 @@ export default {
     },
    processPayment() {
       this.$http.post('api/payments/process',
-          { nonce: this.nonce, name: this.name }
+          { nonce: this.nonce, id: this.id }
           ).then(res => {
             
               this.$refs.payModal.hide();

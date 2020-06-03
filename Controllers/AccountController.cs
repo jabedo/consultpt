@@ -145,7 +145,8 @@ namespace app.Controllers
                 jwtToken = _tokenHandler.WriteToken(token),
                 name = subscriber.Name,
                 email = principal.FindFirstValue(ClaimTypes.Email),
-                role = principal.FindFirstValue(ClaimTypes.Role)
+                role = principal.FindFirstValue(ClaimTypes.Role),
+                clientId = subscriber.Id.ToString()
             });
         }
 

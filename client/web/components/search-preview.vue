@@ -21,8 +21,8 @@
   </div>
 </template>
 <script>
-import ListContacts from '@/components/ListContacts';
-import ProviderBio from '@/components/Bio';
+import ListContacts from '@/components/list-contacts';
+import ProviderBio from '@/components/provider-bio';
 import { eventBus } from '../eventBus'
 
 export default {
@@ -48,7 +48,7 @@ export default {
     },
    onPaymentCancelled() {},
     onPaymentAuthorized() {
-       this.$router.push({ name: "Chat", params: { id: this.selectedContact.id } });
+       this.$router.push({ name: "Chat", params: { id: this.selectedContact.id , name: this.selectedContact.name, clientId: this.clientId} });
     },
   },
 };

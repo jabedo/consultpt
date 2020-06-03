@@ -14,6 +14,7 @@ const store = {
   getters: {
     isAuthenticated: state => state.profile.name && state.profile.email && state.profile.jwtToken,
     jwtToken: (state) => state.jwtToken,
+    clientId: (state) => state.profile.clientId,
   },
 
   mutations: {
@@ -43,9 +44,9 @@ const store = {
   
     loginToken ({ commit }, credentials) {
       return axios.post('account/token', credentials).then(res => {
-        const profile = res.data
+        const profile = res.data //jwtToken, name, email, role, clientId
         const jwtToken = res.data.jwtToken
-      
+        
         commit('setProfile', profile)
         commit('setJwtToken', jwtToken)
       })

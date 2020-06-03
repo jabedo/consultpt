@@ -28,7 +28,6 @@ export default {
   },
 
     created () {
- /*    this.restoreContext() */
     eventBus.$on("enableChat", this.EnableChat);
   },
   data(){return {enable: false}},
@@ -38,13 +37,10 @@ export default {
     ]),
     EnableChat(enable){
       this.enable = enable;
-      this.$notificationHub.onAvailabilitySet(this.id, this.roomId, enable);
-    /*   this.$notificationHub.onAvailabilitySet(this.profile.email, this.profile.roomId, this.profile.clientId, enable).then(()=>{
-         eventBus.$emit("readyToChat", enable);
-      }) */
-    }
+      this.$notificationHub.onAvailabilitySet(this.id, this.roomId, enable).then(()=> {
+            eventBus.$emit("readyToChat", enable);
+      });
   },
- 
-  
+  }
 }
 </script>

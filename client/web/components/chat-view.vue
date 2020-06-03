@@ -6,28 +6,25 @@
         <video id="local-video" autoplay playsinline muted></video>
     </div>
 
-    <div id="room-selection" class="hidden">
+    <div v-if="canChat" id="room-selection">
         <h1>Pt Web</h1>
         <div>
-            <div id="room-id-input-div">
-                <input type="text" id="room-id-input" autofocus />
-                <label class="error-label hidden" for="room-id-input" id="room-id-input-label">Room name must be 5 or
-                    more characters and include only letters, numbers, underscore and hyphen.</label>
+            <div id="room-id-input-div" class="hidden">
+                <input type="text" id="room-id-input" readonly autofocus />
             </div>
             <div id="room-id-input-buttons">
-                <button id="join-button" :disabled="!isAuthenticated">JOIN</button>
-                <button id="random-button" :disabled="!isAuthenticated" >RANDOM</button>
+                <button @click="onJoin" id="join-button">JOIN {{ name }}</button>
             </div>
         </div>
-        <div id="recent-rooms">
+   <!--      <div id="recent-rooms">
             <p>Recently used rooms:</p>
             <ul id="recent-rooms-list"></ul>
-        </div>
+        </div> -->
     </div>
 
     <div id="confirm-join-div" class="hidden">
         <div>Ready to join<span id="confirm-join-room-span"></span>?</div>
-        <button id="confirm-join-button" :disabled="!isAuthenticated">JOIN</button>
+        <button id="confirm-join-button">JOIN</button>
     </div>
 
     <footer>
@@ -35,6 +32,8 @@
             <div id="room-link">Waiting for someone to join: <a id="room-link-href" href=""
                     target="_blank"></a></div>
         </div>
+        <div id="info-div">Web Pt from <a href="www.ptweb.com"
+                title="Check Us Out at ">www.ptweb.com</a></div>
         <div id="status-div"></div>
         <div id="rejoin-div" class="hidden"><span>You have left the call.</span> <button
                 id="rejoin-button">REJOIN</button><button id="new-room-button">NEW ROOM</button></div>
@@ -100,12 +99,12 @@
  
     </div>
  
- 
 </template>
 <script>
 import { mapActions , mapGetters, mapState } from 'vuex'
 import adapter from 'webrtc-adapter';
 import apprtc from '../store/apprtc'
+import axios from "axios";
 import { eventBus } from '../eventBus'
 
 
@@ -122,22 +121,31 @@ const loadingParams = {
       peerConnectionConfig: {"rtcpMuxPolicy": "require", "bundlePolicy": "max-bundle", "iceServers": ['stun:74.125.142.127:19302']},
       peerConnectionConstraints: {"optional": []},
       iceServerRequestUrl: 'https://networktraversal.googleapis.com/v1alpha/iceconfig?key=AIzaSyA2WoxRAjLTwrD7upuk9N2qdlcOch3D2wU',
-      iceServerRequestUrl: '',//  'https://networktraversal.googleapis.com/v1alpha/iceconfig?key=AIzaSyA2WoxRAjLTwrD7upuk9N2qdlcOch3D2wU',
-      iceServerTransports: '' ,
-/*    wssUrl: 'wss://apprtc-ws.webrtc.org:443/ws',
-      wssPostUrl: 'https://apprtc-ws.webrtc.org:443',  */
-      wssUrl: 'wss://localhost:5100:/ws',
-      wssPostUrl: 'http://localhost:5100,',
+      iceServerTransports: '',
+/*        wssUrl: 'ws://localhost:5100/ws',
+      wssPostUrl: 'http://localhost:5100', */
+      wssUrl: 'ws:10.0.0.213:443/ws',
+      wssPostUrl: '10.0.0.213:443,',
+    /*   wssUrl: 'ws:127.0.0.1:5100',
+      wssPostUrl: '127.0.0.1:5100', */
       bypassJoinConfirmation: false,
       versionInfo: {"gitHash": "7341b731567cfcda05079363fb27de88c22059cf", "branch": "master", "time": "Mon Sep 23 10:45:26 2019 +0200"},
     };
  
+/* webSocketOptions.AllowedOrigins.Add("ws://localhost:8080/ws");
+            webSocketOptions.AllowedOrigins.Add("http://localhost:8080");
+            webSocketOptions.AllowedOrigins.Add("ws://localhost:8082/ws");
+            webSocketOptions.AllowedOrigins.Add("http://localhost:8082"); */
+        
+
 var appController;
 
 export default {
  data() {
    return{
       id: this.$route.params.id,
+      name: this.$route.params.name,
+      isAvailable: false
    }
  },
  computed: {
@@ -146,8 +154,16 @@ export default {
     ]),
     ...mapGetters('context', [
       'isAuthenticated',
-      'jwtToken'
-    ])
+      'roomId',
+      'jwtToken',
+      'id'
+    ]),
+    canChat(){
+      return this.isAuthenticated && this.isAvailable;
+    },
+    onJoin(){
+      this.initialize();
+    }
   },
     methods: {
 
@@ -157,13 +173,35 @@ export default {
             return;
         }
         loadingParams.roomServer = 'http://localhost:5100/api/room';
-        loadingParams.authtoken = this.jwtToken,
-        appController = new apprtc.AppController(loadingParams);
-     }
+        loadingParams.authtoken = this.jwtToken;
+        loadingParams.roomId = this.roomId;
+        loadingParams.clientId = this.id;
+        loadingParams.axios = axios;
+        loadingParams.requestHeader = {
+          'Content-Type': 'application/json',
+          'Authorization': "Bearer " + this.jwtToken
+        };
+         appController =  new apprtc.AppController(loadingParams);
+        },
+         onVisibilityChange() {
+            if (document.visibilityState === 'prerender') {
+              return;
+            }
+          document.removeEventListener('visibilitychange', onVisibilityChange);
+          initialize();
+         },
+         onReadyToChat(readyToChat){
+           if(readyToChat){
+              this.isAvailable = true;
+              this.initialize();
+           }
+           else
+           {
+             this.isAvailable =false;
+           }
+         }
     },
-    mounted() {
-      this.initialize();
-    },
+
 }
 </script>
 

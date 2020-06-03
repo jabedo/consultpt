@@ -43,7 +43,8 @@ export default {
   ,
  computed: {
     ...mapGetters('context', [
-      'isAuthenticated'
+      'isAuthenticated',
+      'clientId'
     ]),
     readyToBeContacted(){
       return this.isAvailable && this.roomId && this.connectionId;
@@ -51,7 +52,7 @@ export default {
   },
   methods: {
     onClickToPay(){
-      eventBus.$emit("clickToPay", this.name, this.id);
+      eventBus.$emit("clickToPay", this.name, this.id, this.clientId);
     },
     OnContactUpdated(user){
       /* this.user = user; */
