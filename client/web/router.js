@@ -14,11 +14,6 @@ export default new Router({
       name: 'Home',
       component: HomePage
     },
-  /*   {
-      path: '/question/:id',
-      name: 'Question',
-      component: QuestionPage
-    }, */
     {
       path: '/chat/:id',
       name: 'Chat',

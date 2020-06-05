@@ -13,13 +13,9 @@
                 <input type="text" id="room-id-input" readonly autofocus />
             </div>
             <div id="room-id-input-buttons">
-                <button @click="onJoin" id="join-button">JOIN {{ name }}</button>
+                <button id="join-button">JOIN {{ name }}</button>
             </div>
         </div>
-   <!--      <div id="recent-rooms">
-            <p>Recently used rooms:</p>
-            <ul id="recent-rooms-list"></ul>
-        </div> -->
     </div>
 
     <div id="confirm-join-div" class="hidden">
@@ -101,6 +97,8 @@
  
 </template>
 <script>
+/* eslint-disable */
+
 import { mapActions , mapGetters, mapState } from 'vuex'
 import adapter from 'webrtc-adapter';
 import apprtc from '../store/apprtc'
@@ -141,33 +139,44 @@ const loadingParams = {
 var appController;
 
 export default {
- data() {
-   return{
-      id: this.$route.params.id,
+  
+/*     created() {
+     eventBus.$on("startChat", this.onStartChat);
+    },  */
+  watch: {
+    canChat: {
+        immediate: true,
+        deep: true,
+        handler(newValue, oldValue) {
+          if(newValue && !oldValue ){
+             this.initialize();
+          }
+        }
+
+    }
+  },
+  data(){
+    return {
+      isAvailable: false,
+      roomId: this.$route.params.roomId,
       name: this.$route.params.name,
-      isAvailable: false
-   }
- },
+      canChat: this.$route.params.canChat
+    }
+  },
+// props: ['roomId', 'name'],
  computed: {
-    ...mapState('context', [
-      'profile'
-    ]),
     ...mapGetters('context', [
       'isAuthenticated',
-      'roomId',
       'jwtToken',
-      'id'
+      'clientId'
     ]),
-    canChat(){
+  /*   canChat(){
       return this.isAuthenticated && this.isAvailable;
-    },
-    onJoin(){
-      this.initialize();
-    }
+    } */
   },
     methods: {
 
-        initialize(){
+        initialize() {
         if (document.visibilityState === 'prerender') {
             document.addEventListener('visibilitychange', onVisibilityChange);
             return;
@@ -175,7 +184,7 @@ export default {
         loadingParams.roomServer = 'http://localhost:5100/api/room';
         loadingParams.authtoken = this.jwtToken;
         loadingParams.roomId = this.roomId;
-        loadingParams.clientId = this.id;
+        loadingParams.clientId = this.clientId;
         loadingParams.axios = axios;
         loadingParams.requestHeader = {
           'Content-Type': 'application/json',
@@ -183,6 +192,7 @@ export default {
         };
          appController =  new apprtc.AppController(loadingParams);
         },
+
          onVisibilityChange() {
             if (document.visibilityState === 'prerender') {
               return;
@@ -190,8 +200,8 @@ export default {
           document.removeEventListener('visibilitychange', onVisibilityChange);
           initialize();
          },
-         onReadyToChat(readyToChat){
-           if(readyToChat){
+/*          onStartChat(startChat) {
+           if(startChat){
               this.isAvailable = true;
               this.initialize();
            }
@@ -199,9 +209,8 @@ export default {
            {
              this.isAvailable =false;
            }
-         }
+         } */
     },
-
 }
 </script>
 

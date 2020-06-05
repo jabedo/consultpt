@@ -13,7 +13,7 @@
         class="searchbar"
       />
     </div>
-    <div class="empty__message centered" v-if="!items.length">Please Refresh</div>
+    <div class="empty__message centered" v-if="!items.length">Refreshing Contacts... </div>
     <div
       class="empty__message centered"
       v-if="items.length && searchText && !results.length">
