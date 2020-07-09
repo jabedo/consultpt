@@ -2,8 +2,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import HomePage from '@/views/home'
-/* import QuestionPage from '@/views/question' */
-import ChatPage from '@/components/chat-view'
+import ChatPage from '@/views/chat'
 
 Vue.use(Router)
 
@@ -15,10 +14,9 @@ export default new Router({
       component: HomePage
     },
     {
-      path: '/chat/:id',
+      path: '/chat/:roomId',
       name: 'Chat',
       component:ChatPage
     }
-
   ]
 })

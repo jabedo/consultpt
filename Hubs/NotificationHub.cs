@@ -18,11 +18,12 @@ namespace app.Hubs
         Task UpdateUserList(List<JsonUser> users);
         Task ReceiveSignal(JsonUser jsonUser, string signal);
 
-        Task OnRoomJoined(string roomId);
-        Task OnRoomCreated(string roomId);
-        Task OnSendMessage(string roomId, string clientId);
+        //Task OnRoomJoined(string roomId);
+        //Task OnRoomCreated(string roomId);
+        //Task OnSendMessage(string roomId, string clientId);
         Task UpdateUserStatus(JsonUser jsonUser);
         Task OnUpdateUsersList();
+        Task OnSendMessage(string message, string roomId, string clientId);
     }
     [Authorize]
     public class NotificationHub: Hub<INotificationHub>
@@ -33,6 +34,7 @@ namespace app.Hubs
         private static readonly List<CallOffer> CallOffers = new List<CallOffer>();
         private readonly static ConnectionMapping<string> _connections =
                         new ConnectionMapping<string>();
+        private static readonly Dictionary<string, List<string>> _rooms = new Dictionary<string, List<string>>();
         private ILogger<NotificationHub> _logger;
         #endregion
 
@@ -81,6 +83,7 @@ namespace app.Hubs
                     clientUser.ConnectionId = Context.ConnectionId;
                 }
 
+               
                 SendUserListUpdate();
             }
             return base.OnConnectedAsync();
@@ -116,6 +119,32 @@ namespace app.Hubs
         public async Task CreateRoom(string roomId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+        }
+
+        //Room registration be done by provider
+        public void RegisterRoom(string roomId, string clientId, string message)
+        {
+            List<string> clients;
+            if (_rooms.TryGetValue(roomId, out clients))
+            {
+                foreach (var kvp in _rooms)
+                {
+                    if (kvp.Key == roomId)
+                    {
+                        kvp.Value.Add(clientId);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                clients = new List<string>();
+                clients.Add(clientId);
+                _rooms.Add(roomId, clients);
+            }
+
+            Clients.Groups(roomId).OnSendMessage(message, roomId, clientId);
+       
         }
 
         public async Task RemoveFromGroup(string roomId)

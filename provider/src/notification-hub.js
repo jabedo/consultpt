@@ -48,7 +48,9 @@ export default {
       connection.on("CallEnded", (endingUserID, reason) => {
         notificationHub.$emit("call-ended", { endingUserID, reason });
       });
-
+      connection.on("OnSendMesage", (message) => {
+        notificationHub.$emit("receive-message", message);
+      });
       // You need to call connection.start() to establish the connection but the client wont handle reconnecting for you!
       // Docs recommend listening onclose and handling it there.
       // This is the simplest of the strategies
@@ -127,6 +129,13 @@ export default {
         .catch(console.error);
     };
 
+    notificationHub.onRoomRegistered = (clientId, roomId) => {
+      if (!startedPromise) return;
+
+      return startedPromise
+        .then(() => connection.invoke("RegisterRoom", clientId, roomId))
+        .catch(console.error);
+    };
     notificationHub.callUser = (targetConnectionId) => {
       if (!startedPromise) return;
 

@@ -37,6 +37,9 @@ export default {
       connection.on("UpdateUserStatus", (user) => {
         notificationHub.$emit("update-user-status", user);
       });
+      connection.on("OnSendMesage", (message, roomId, clientId) => {
+        notificationHub.$emit("receive-message", { message, roomId, clientId });
+      });
 
       connection.on("CallAccepted", (acceptingUser) => {
         notificationHub.$emit("call-accepted", { acceptingUser });
@@ -133,6 +136,8 @@ export default {
         .then(() => connection.invoke("SetAvailability",  id, roomId, isAvailable))
         .catch(console.error);
     };
+
+    
 
     notificationHub.callUser = (targetConnectionId) => {
       if (!startedPromise) return;

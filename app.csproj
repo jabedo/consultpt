@@ -48,6 +48,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\MessageController.cs" />
     <Compile Remove="Controllers\QuestionController.cs" />
     <Compile Remove="Hubs\NotifyHub.cs" />
     <Compile Remove="Utilities\ImageSaveUtility.cs" />
@@ -70,7 +71,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.3" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.5.0" />
   </ItemGroup>
 

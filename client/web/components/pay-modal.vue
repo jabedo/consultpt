@@ -133,9 +133,6 @@ export default {
         .then(() => {
           eventBus.$emit("paymentauthorized");
         })
-/*         .then(() =>{
-           eventBus.$emit("startChat", true);
-        }) */
         .catch(err => {
           this.error = "Error processing Payment. Please try again!";
           console.log(err);

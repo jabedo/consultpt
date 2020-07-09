@@ -545,6 +545,7 @@
       this.params_ = params;
       this.roomServer_ = params.roomServer || "";
       this.axios_ = params.axios;
+      this.hub_ = params.hub;
       this.clientId_ = params.clientId;
       this.channel_ = new SignalingChannel(params.wssUrl, params.wssPostUrl);
       this.channel_.onmessage = this.onRecvSignalingChannelMessage_.bind(this);
@@ -2631,7 +2632,7 @@ var RoomSelection = function (
       return newLine.join(" ");
     }
 
-    var SignalingChannel = function(wssUrl, wssPostUrl) {
+    var SignalingChannel = function(wssUrl, wssPostUrl, hub) {
       this.wssUrl_ = wssUrl;
       this.wssPostUrl_ = wssPostUrl;
       this.roomId_ = null;
@@ -2640,6 +2641,7 @@ var RoomSelection = function (
       this.registered_ = false;
       this.onerror = null;
       this.onmessage = null;
+      this.hub_ = hub;
     };
     SignalingChannel.prototype.open = function() {
       if (this.websocket_) {
@@ -2709,6 +2711,7 @@ var RoomSelection = function (
       if (!this.clientId_) {
         trace("ERROR: missing clientId.");
       }
+      /*
       if (!this.websocket_ || this.websocket_.readyState !== WebSocket.OPEN) {
         trace("WebSocket not open yet; saving the IDs to register later.");
         return;
@@ -2719,7 +2722,11 @@ var RoomSelection = function (
         roomid: this.roomId_,
         clientid: this.clientId_,
       };
+
       this.websocket_.send(JSON.stringify(registerMessage));
+      */
+
+      this.hub_.onRegisterRoom(this.clientId_, this.roomId_, JSON.stringify(registerMessage));
       this.registered_ = true;
       trace("Signaling channel registered.");
     };
@@ -2751,19 +2758,24 @@ var RoomSelection = function (
         trace("ERROR: SignalingChannel has not registered.");
         return;
       }
-      trace("C->WSS: " + message);
-      var wssMessage = { cmd: "send", msg: message };
-      var msgString = JSON.stringify(wssMessage);
-      if (this.websocket_ && this.websocket_.readyState === WebSocket.OPEN) {
-        this.websocket_.send(msgString);
-      } else {
-        var path = this.getWssPostUrl();
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", path, true);
-        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhr.setRequestHeader("Authorization", "Bearer " + this.params_.authtoken);
-        xhr.send(wssMessage.msg);
-      }
+
+
+      // trace("C->WSS: " + message);
+      // var wssMessage = { cmd: "send", msg: message };
+      // var msgString = JSON.stringify(wssMessage);
+      // if (this.websocket_ && this.websocket_.readyState === WebSocket.OPEN) {
+      //   this.websocket_.send(msgString);
+      // } else {
+      //   var path = this.getWssPostUrl();
+      //   var xhr = new XMLHttpRequest();
+      //   xhr.open("POST", path, true);
+      //   xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      //   xhr.setRequestHeader("Authorization", "Bearer " + this.params_.authtoken);
+      //   xhr.send(wssMessage.msg);
+      // }
+      
+      this.hub_.SendMesage(message, this.roomId_, this.clientId_);
+
     };
     SignalingChannel.prototype.getWssPostUrl = function() {
       return this.wssPostUrl_ + "/" + this.roomId_ + "/" + this.clientId_;

@@ -69,36 +69,36 @@ namespace ConsultPT.APIs.Controllers
         }
 
 
-        // GET: api/Users/5
-        [HttpGet("{name}", Name = "Get")]
-        public ActionResult<ProviderInfo> GetProvider(string name)
-        {
-            var  provider=  _context.Providers.Where(c => c.UserName == name).Select(c => new ProviderInfo
-            {
-                Bio = c.Bio,
-                ConnectionId = null,
-                InCall = false,
-                LicenseNumber = c.IDLicenceNumber,
-                StateRegistered = c.LicenseState,
-                Title = c.Credentials,
-                IsAvailable = false,
-                Username = c.UserName,
-                UserType = UserType.provider,
-                PhoneNumber = c.PhoneNumber,
-                Name = string.Format("{0} {1}", c.FirstName.TrimEnd(), c.LastName.TrimEnd()),
-                Address = c.City,
-                PhotoName = c.PhotoName_URL
-            }).FirstOrDefault();
+        //// GET: api/Users/5
+        //[HttpGet("{name}", Name = "Get")]
+        //public ActionResult<ProviderInfo> GetProvider(string name)
+        //{
+        //    var  provider=  _context.Providers.Where(c => c.UserName == name).Select(c => new ProviderInfo
+        //    {
+        //        Bio = c.Bio,
+        //        ConnectionId = null,
+        //        InCall = false,
+        //        LicenseNumber = c.IDLicenceNumber,
+        //        StateRegistered = c.LicenseState,
+        //        Title = c.Credentials,
+        //        IsAvailable = false,
+        //        Username = c.UserName,
+        //        UserType = UserType.provider,
+        //        PhoneNumber = c.PhoneNumber,
+        //        Name = string.Format("{0} {1}", c.FirstName.TrimEnd(), c.LastName.TrimEnd()),
+        //        Address = c.City,
+        //        PhotoName = c.PhotoName_URL
+        //    }).FirstOrDefault();
 
-            if(provider == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return Ok(provider);
-            }
-        }
+        //    if(provider == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    else
+        //    {
+        //        return Ok(provider);
+        //    }
+        //}
 
         // POST: api/Users
         [HttpPost]

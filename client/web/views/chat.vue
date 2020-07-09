@@ -6,28 +6,21 @@
         <video id="local-video" autoplay playsinline muted></video>
     </div>
 
-    <div id="room-selection" class="hidden">
+    <div v-if="canChat" id="room-selection">
         <h1>Pt Web</h1>
         <div>
-            <div id="room-id-input-div">
-                <input type="text" id="room-id-input" autofocus />
-                <label class="error-label hidden" for="room-id-input" id="room-id-input-label">Room name must be 5 or
-                    more characters and include only letters, numbers, underscore and hyphen.</label>
+            <div id="room-id-input-div" class="hidden">
+                <input type="text" id="room-id-input" readonly autofocus />
             </div>
             <div id="room-id-input-buttons">
-                <button id="join-button" :disabled="!isAuthenticated">JOIN</button>
-                <button id="random-button" :disabled="!isAuthenticated" >RANDOM</button>
+                <button id="join-button">JOIN {{ name }}</button>
             </div>
-        </div>
-        <div id="recent-rooms">
-            <p>Recently used rooms:</p>
-            <ul id="recent-rooms-list"></ul>
         </div>
     </div>
 
     <div id="confirm-join-div" class="hidden">
         <div>Ready to join<span id="confirm-join-room-span"></span>?</div>
-        <button id="confirm-join-button" :disabled="!isAuthenticated">JOIN</button>
+        <button id="confirm-join-button">JOIN</button>
     </div>
 
     <footer>
@@ -35,8 +28,8 @@
             <div id="room-link">Waiting for someone to join: <a id="room-link-href" href=""
                     target="_blank"></a></div>
         </div>
-        <div id="info-div">Code for AppRTC is available from <a href="http://github.com/webrtc/apprtc"
-                title="GitHub repo for AppRTC">github.com/webrtc/apprtc</a></div>
+        <div id="info-div">Web Pt from <a href="www.ptweb.com"
+                title="Check Us Out at ">www.ptweb.com</a></div>
         <div id="status-div"></div>
         <div id="rejoin-div" class="hidden"><span>You have left the call.</span> <button
                 id="rejoin-button">REJOIN</button><button id="new-room-button">NEW ROOM</button></div>
@@ -93,25 +86,28 @@
 
     </div>
     <div id="privacy">
-        <a href="//www.google.com/accounts/TOS">Terms</a>
+        <a href="#">Terms</a>
         &#32;&#124;&#32;
-        <a href="//www.google.com/policies/privacy/">Privacy</a>
+        <a href="#">Privacy</a>
         &#32;&#124;&#32;
-        <a href="//github.com/webrtc/apprtc">Code repo</a>
     </div>
 
  
     </div>
- 
  
 </template>
 <script>
-import { mapGetters, mapState } from 'vuex'
+/* eslint-disable */
+
+import { mapActions , mapGetters, mapState } from 'vuex'
 import adapter from 'webrtc-adapter';
-import apprtc from '../store/apprtc';
+import apprtc from '../store/apprtc'
+import axios from "axios";
 import { eventBus } from '../eventBus'
 
-
+/*   var scheme = document.location.protocol === "https:" ? "wss" : "ws";
+  var port = document.location.port ? (":" + document.location.port) : "";
+ connectionUrl.value = scheme + "://" + document.location.hostname + port + "/ws" ; */
   
 const roomServer = 'http://localhost:5100/api/room/';
 const loadingParams = {
@@ -125,47 +121,86 @@ const loadingParams = {
       peerConnectionConfig: {"rtcpMuxPolicy": "require", "bundlePolicy": "max-bundle", "iceServers": ['stun:74.125.142.127:19302']},
       peerConnectionConstraints: {"optional": []},
       iceServerRequestUrl: 'https://networktraversal.googleapis.com/v1alpha/iceconfig?key=AIzaSyA2WoxRAjLTwrD7upuk9N2qdlcOch3D2wU',
-      iceServerRequestUrl: '',//  'https://networktraversal.googleapis.com/v1alpha/iceconfig?key=AIzaSyA2WoxRAjLTwrD7upuk9N2qdlcOch3D2wU',
-      iceServerTransports: '' ,
-/*    wssUrl: 'wss://apprtc-ws.webrtc.org:443/ws',
-      wssPostUrl: 'https://apprtc-ws.webrtc.org:443',  */
-      wssUrl: 'ws:10.0.0.213:443/ws',
-      wssPostUrl: '10.0.0.213:443,',
+      iceServerTransports: '',
+      wssUrl: 'ws://localhost:5100/ws',
+      wssPostUrl: 'http://localhost:5100',
+    /*   wssUrl: 'ws:10.0.0.213:443/ws',
+      wssPostUrl: '10.0.0.213:443,', */
       bypassJoinConfirmation: false,
       versionInfo: {"gitHash": "7341b731567cfcda05079363fb27de88c22059cf", "branch": "master", "time": "Mon Sep 23 10:45:26 2019 +0200"},
     };
  
+/* webSocketOptions.AllowedOrigins.Add("ws://localhost:8080/ws");
+            webSocketOptions.AllowedOrigins.Add("http://localhost:8080");
+            webSocketOptions.AllowedOrigins.Add("ws://localhost:8082/ws");
+            webSocketOptions.AllowedOrigins.Add("http://localhost:8082"); */
+        
+
 var appController;
 
 export default {
 
+ mounted() {
+    this.initialize();
+/*   setTimeout(() =>{
+    this.initialize();
+    }, 5000); */
+    },
+  data(){
+    return {
+      isAvailable: false,
+      roomId: this.$route.params.roomId,
+      name: this.$route.params.name,
+      canChat: this.$route.params.canChat,
+    }
+  },
  computed: {
-    ...mapState('context', [
-      'profile'
-    ]),
     ...mapGetters('context', [
       'isAuthenticated',
-      'jwtToken'
-    ])
+      'jwtToken',
+      'clientId'
+    ]),
   },
     methods: {
 
-        initialize(){
+        initialize() {
         if (document.visibilityState === 'prerender') {
             document.addEventListener('visibilitychange', onVisibilityChange);
             return;
         }
         loadingParams.roomServer = 'http://localhost:5100/api/room';
-        loadingParams.authtoken = this.jwtToken,
-        appController = new apprtc.AppController(loadingParams);
-     }
+        loadingParams.authtoken = this.jwtToken;
+        loadingParams.roomId = this.roomId;
+        loadingParams.clientId = this.clientId;
+        loadingParams.axios = axios;
+        loadingParams.hub = this.$notificationHub;
+        loadingParams.requestHeader = {
+          'Content-Type': 'application/json',
+          'Authorization': "Bearer " + this.jwtToken
+        };
+         appController =  new apprtc.AppController(loadingParams);
+        },
+
+         onVisibilityChange() {
+            if (document.visibilityState === 'prerender') {
+              return;
+            }
+          document.removeEventListener('visibilitychange', onVisibilityChange);
+          initialize();
+         },
+        //  onReadyToChat(readyToChat, roomId, name){
+        //    if(readyToChat){
+        //       this.isAvailable = true;
+        //       this.roomId = roomId;
+        //       this.name = name;
+        //       this.initialize();
+        //    }
+        //    else
+        //    {
+        //      this.isAvailable =false;
+        //    }
+        //  }
     },
-    created(){
-         eventBus.$on("loginComplete", this.initialize);
-    },
-  /*   mounted() {
-      this.initialize();
-    }, */
 }
 </script>
 

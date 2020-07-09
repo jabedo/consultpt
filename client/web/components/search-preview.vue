@@ -18,23 +18,20 @@
             </provider-bio>
           </div>
       </div>
-<!--   <chat-view v-if="enableChat"
-    :roomId='this.selectedContact.roomId'
-    :name="this.selectedContact.name"
-   /> -->
+  <!--     <chat-modal v-if="enableChat"/> -->
   </div>
 </template>
 <script>
 import ListContacts from '@/components/list-contacts';
 import ProviderBio from '@/components/provider-bio';
-import ChatView from '@/components/chat-view'
+/* import ChatModal from '@/components/chat-modal' */
 import { eventBus } from '../eventBus'
 
 export default {
   components: {
     ListContacts,
     ProviderBio,
-    ChatView,
+/*     ChatModal, */
   },
 
   created() {
@@ -55,13 +52,14 @@ export default {
     },
    onPaymentCancelled() {
        this.enableChat = false;
-         eventBus.$emit("startChat", false);
+         eventBus.$emit("startChat", false, this.selectedContact.roomId, this.selectedContact.name, this.$);
    },
     onPaymentAuthorized() {
         this.enableChat = true;
-       this.$router.push({ name: "Chat", params: { id: this.selectedContact.roomId , name: this.selectedContact.name, canChat: true} });
-     
-      //  eventBus.$emit("startChat", true);
+       this.$router.push({ name: "Chat", params: { roomId: this.selectedContact.roomId , name: this.selectedContact.name, canChat: true} });
+        // eventBus.$emit("startChat", true, this.selectedContact.roomId, this.selectedContact.name);
+
+
     },
   },
 };
