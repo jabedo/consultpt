@@ -15,7 +15,8 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 
 import App from './App';
 import store from './store';
-import NotificationHub from './notification-hub'
+import NotificationHub from './notification-hub';
+import RoomsHub from './rooms-hub';
 Vue.config.productionTip = false;
 
 axios.defaults.baseURL = 'http://localhost:5100' // same as the Url the server listens to
@@ -35,7 +36,7 @@ Vue.component('text-highlighter', TextHighlighter);
 // Install Vue extensions
 Vue.use(BootstrapVue)
 Vue.use(NotificationHub);
-
+Vue.use(RoomsHub);
 new Vue({
   el: '#app',
   components: { App },

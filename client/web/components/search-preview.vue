@@ -57,8 +57,6 @@ export default {
     onPaymentAuthorized() {
         this.enableChat = true;
        this.$router.push({ name: "Chat", params: { roomId: this.selectedContact.roomId , name: this.selectedContact.name, canChat: true} });
-        // eventBus.$emit("startChat", true, this.selectedContact.roomId, this.selectedContact.name);
-
 
     },
   },

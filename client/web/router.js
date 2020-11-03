@@ -14,9 +14,14 @@ export default new Router({
       component: HomePage
     },
     {
-      path: '/chat/:roomId',
+      path: '/chat/',
       name: 'Chat',
       component:ChatPage
+    },
+    {
+      path: '/r/:roomId',
+      name: 'Chat1',
+      component: ChatPage
     }
   ]
 })

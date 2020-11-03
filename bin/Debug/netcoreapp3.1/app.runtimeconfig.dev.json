@@ -3,6 +3,7 @@
     "additionalProbingPaths": [
       "C:\\Users\\ajabedo\\.dotnet\\store\\|arch|\\|tfm|",
       "C:\\Users\\ajabedo\\.nuget\\packages",
+      "C:\\Microsoft\\Xamarin\\NuGet",
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
     ]
   }

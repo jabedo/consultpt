@@ -30,7 +30,7 @@ export default {
     created () {
     eventBus.$on("enableChat", this.EnableChat);
   },
-  data(){return {enable: false}},
+  data(){ return {enable: false}},
   methods: {
     ...mapActions('context', [
       'restoreContext'
